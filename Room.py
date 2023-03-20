@@ -7,18 +7,20 @@ class Room():
         self.__room_picture = []
         self.__room_number = []
         self.__room_status = []
-    def select_filters_room():
+    def select_filters_room(self):
         pass
-    def select_addons():
+    def select_addons(self):
         pass
-    def create_booking_room():
+    def create_booking_room(self):
+        pass
+    def create_room(self):
         pass
 
 class Addons:
     def __init__(self):
         self.__detail = []
         self.__add_on_list  =[]
-    def get_addons():
+    def get_addons(self):
         pass
 
 class BreakfastService():
