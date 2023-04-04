@@ -23,17 +23,3 @@ class Report:
     def respond_report(self):
         pass    
 
-class Hotel():
-    def __init__(self):
-        self.__name_hotel = []
-        self.__rating = []
-        self.__number_room = []
-        self.__hotel_picture = []
-    def get_hotel_details(self):
-        pass
-        
-class HotelCatalog():
-    def __init__(self):
-        self.__hotel_list = []
-    def select_hotel(self):
-        pass
