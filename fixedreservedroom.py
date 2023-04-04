@@ -164,7 +164,6 @@ class Booking:
         self.date_check_out_reserve = ["Hotel A-101-23-3-2021","Hotel B-101-26-3-2021","Hotel B-102-15-3-2021"]
         self.check_hotel = []
         self.check_room = []
-
         self.service_price = 0 
         
     def get_room_list(self):
@@ -198,24 +197,41 @@ class Booking:
                                         day_in=int(state_check_in[2])
                                         month_in=int(state_check_in[3])
                                         year_in=int(state_check_in[4])
-                                        for k in self.date_check_out_reserve:
-                                            for n in k:
-                                                if(n==k[6]):
-                                                    if(hotel_name[6]==n):
-                                                        state_check_out = i.split("-")
-                                                        day_out=int(state_check_out[2])
-                                                        month_out=int(state_check_out[3])
-                                                        year_out=int(state_check_out[4])
-                                                        if self.check_in[1] == month_in and int(room_in) == int(room_number):
-                                                            if not (day_in<= self.check_in[0] <= day_out) and not(self.num_room / self.num_people <= 0.25):
-                                                                status_collect.append(True)         
-                                                            else:
-                                                                status_collect.append(False)
+
+
+                        for k in self.date_check_out_reserve:
+                            for n in k:
+                                if(n==k[6]):
+                                    if(hotel_name[6]==n):
+                                        state_check_out = k.split("-")
+                                        day_out=int(state_check_out[2])
+                                        month_out=int(state_check_out[3])
+                                        year_out=int(state_check_out[4])
+
+
+                        if self.check_in[1] == month_in and int(room_in) == int(room_number):
+                            if not (day_in<= self.check_in[0] <= day_out) and not(self.num_room / self.num_people <= 0.25):
+                                status_collect.append(True)         
+                            else:
+                                status_collect.append(False)
                         
                         for check in status_collect:
                             value_collect +=1
                             if(check==True):
                                 value_check_true+=1
+                        
+                        if (self.check_in[2]%4==0 and self.check_in[2]%100 !=0) or self.check_in[2]%400:
+                                if(self.check_in[1]==2 and 1<=self.check_in[0]<=29):
+                                    print("year Atigu")
+                                if(self.check_in[1]==2 and (30<=self.check_in[0]<=31 or 30<=self.check_out[0]<=31)):
+                                    print("error insert Day")
+                                    return False
+                        else:
+                            if(self.check_in[1]==2 and 1<=self.check_in[0]<=28):
+                                print("year Pokkati")
+                            if(self.check_in[1]==2 and (29<=self.check_in[0]<=31 or 29<=self.check_out[0]<=31)):
+                                print("error insert Day")
+                                return False
 
                         if room.room_status == True and value_check_true==value_collect:
                             room.update_status(hotel) #update_status
@@ -230,10 +246,13 @@ class Booking:
                             print("Room booked successfully!")
                             print("Room status:",room_number,":",room.room_status) #show status
 
+
                             self.total_day = ( int(self.check_out[0]) - int(self.check_in[0]) ) + 30*( int(self.check_out[1]) - int(self.check_in[1]) )
                             if self.total_day ==0:
                                 self.total_day +=1
                             print(self.total_day) #send total_day to class Payment
+                    
+
                             self.booking_add_on() #after book room complete
                             return True
                         else:
