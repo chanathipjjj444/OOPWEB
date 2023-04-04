@@ -46,44 +46,22 @@ class Room():
         self.bed_type = bed_type
         self.room_status = status
     
-    '''
-    def update_status(self, hotel):
-        self._room_status = not self._room_status
-        for room in hotel.room_list:
-            if room._room_number == self._room_number:
-                room._room_status = self._room_status
-                break
-    '''
-    def update_status(self, hotel):
+    def update_status(self, hotel,room_catalog:object):
         self.room_status = not self.room_status
+        self.room_catalog = room_catalog
         for room in hotel.room_list:
             if room.room_number == self.room_number:
                 room.room_status = self.room_status
                 break
-        print(room_cat.room_list)
-        # for i, room in enumerate(room_cat.room_list):
-        #     if room[0] == self.room_number:
-        #         updated_room = (self.room_number, self.room_type, self.max_people, self.price_room, self.facilities_detail, 
-        #                         self.bed_type, self.room_status)
-        #         room_cat.room_list[i] = updated_room
-        #         break
-        
-    '''
-    def update_status(self, hotel):
-        self.room_status = not self.room_status
-        for room in hotel.room_list():
-            if room.room_number() == self.room_number:
-                for i, room in enumerate(room_cat.room_list):
-                    if room[0] == self.room_number: #check room_number
-                        updated_room = (self.room_number, self.room_type, self.price_room, self.facilities_detail, 
-                                self.bed_type, self.room_status)
-                        room_cat.room_list[i] = updated_room
-        room.room_status() == self.room_status
-    '''
-                
+
+        for i, room in enumerate(self.room_catalog.room_list):
+            if room[0] == self.room_number:
+                updated_room = (self.room_number, self.room_type, self.max_people, self.price_room, self.facilities_detail, self.bed_type, self.room_status)
+                room_cat.room_list[i] = updated_room
+                break
 # Define the class to add the new list to
 
-class RoomCat:
+class AvaliableRoom:
     def __init__(self):
         self.room_list = []
     
@@ -92,24 +70,23 @@ class RoomCat:
                     room_class.bed_type, room_class.room_status)
         self.room_list.append(new_room)
 
-
+    def remove_room(self):
+        for i in self.room_list:
+            if i[6] == False:
+                self.room_list.pop(self.room_list.index(i))
 
 class Addons:
     def __init__(self):
-        self.add_on_list  =[]
-    '''    
-    def get_addons(self, detail, all_services):
-        addons = (all_services.__type_food)
-        self.__detail = detail
-        self.__add_on_list.append(addons)
-    '''
-    def add_breakfast_service(self, breakfast):
-        breakfast_list=(breakfast.type_service, breakfast.detail ,breakfast.type_food, breakfast.price_food)
-        self.add_on_list.append(breakfast_list)
+        self.add_on_list  = []
 
-    def add_spa_service(self, spa):
-        spa_list=(spa.type_service, spa.detail, spa.spa_picture, spa.price_spa)
-        self.add_on_list.append(spa_list)
+    def add_breakfast_service(self, breakfast:object):
+        self.add_on_list.append(breakfast)
+
+    def add_spa_service(self, spa:object):
+        self.add_on_list.append(spa)
+    
+    def add_activity(self, activity):
+        pass
     
     def get_add_on_list(self):
         return self.add_on_list
@@ -120,15 +97,6 @@ class BreakfastService():
         self.detail = detail
         self.type_food = type_food
         self.price_food = price_food
-    '''
-    def get_detail(self):
-        return self.detail
-    def get_type_food(self):
-        return self.type_food
-    def get_price_food(self):
-        return self.price_food
-    '''
-
 class SpaService:
     def __init__(self, type_service, detail, spa_picture, price_spa):
         self.type_service = type_service
@@ -170,7 +138,7 @@ class Booking:
     def get_room_list(self):
         return self.room_catalog.room_list
     
-    def book_room_check(self, hotel_name, room_number):
+    def book_room(self, hotel_name, room_number):
         hotel = catalog.find_hotel(hotel_name)
         self.chosen_hotel = hotel_name
         if hotel:
@@ -188,7 +156,7 @@ class Booking:
                         status_collect=[]
                         value_collect =0
                         value_check_true =0
-                        
+
                         for i in self.date_check_in_reserve:
                             for j in i:
                                 if(j==i[6]):
@@ -218,7 +186,8 @@ class Booking:
                                 value_check_true+=1
 
                         if room.room_status == True and value_check_true==value_collect:
-                            room.update_status(hotel) #update_status
+                            room.update_status(hotel, room_cat) #update_status
+                            room_cat.remove_room()
                             collect_in = hotel_name+"-"+str(room_number)+"-"+str(self.check_in[0])+"-"+str(self.check_in[1])+"-"+str(self.check_in[2])
                             collect_out = hotel_name+"-"+str(room_number)+"-"+str(self.check_out[0])+"-"+str(self.check_out[1])+"-"+str(self.check_out[2])
                             self.date_check_in_reserve.append(collect_in)
@@ -245,7 +214,7 @@ class Booking:
         else:
             print("Unable to find hotel.")
 
-   
+
     def booking_add_on(self,  choices=["breakfast","spa","activity","taxi"]):
             hotel = catalog.find_hotel(self.chosen_hotel)
             hotel.show_add_on()
@@ -260,7 +229,7 @@ class Booking:
                         if item[0] == type_input and type_input in choices: #watch first index breakfast spa activity taxi
                             filtered_list.append(item)                     #ใส่เฉพาะ type_service ที่กรอก input  
                     if len(filtered_list) > 0:                             # Not []
-                        for index, item in enumerate(filtered_list):     
+                        for index, item in enumerate(filtered_list):
                             print("choice:",str(index+1),item[1])          #show index 1 of each filter serviece ex.breakfast service -> corn_soup ,sisler sald   
                     if item[0] == type_input and type_input in choices:
                         choice = int(input("enter your choice:"))
@@ -271,8 +240,7 @@ class Booking:
                             self.set_add_on_price()
                     else:
                         print("This hotel has no this service type")
-
-                else:
+                else:   
                     print("Unable to find hotel")    
             else:
                 print("Add on is not booking")
@@ -486,7 +454,7 @@ class DiscountNumRoom:
         self.value_discount = value_discount
 
 
-room_cat = RoomCat()
+room_cat = AvaliableRoom()
 room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', True)
 room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', True)
 room3 = Room(103, 'Deluxe', 4, 3000, 'TV, AC, Jacuzzi', 'Queen', True)
@@ -518,13 +486,15 @@ catalog = HotelCatalog()
 catalog.add_hotel(hotel1)
 catalog.add_hotel(hotel2)
 print("before booking")
+print("Room list ", room_cat.room_list)
 
 hotel1.show_room()
 
 
 book1=Booking(room_cat,"28-2-2021","1-3-2021",3,1)
 
-book1.book_room_check("Hotel A", 101)
+book1.book_room("Hotel A", 101)
+print("Room list ", room_cat.room_list)
 
 hotel1.show_room()
 
@@ -560,5 +530,5 @@ pay1.process_payment()
 
 #book second time 
 book2=Booking(room_cat,"20-3-2021","25-3-2021",3,1)
-book2.book_room_check("Hotel B", 101)
+book2.book_room("Hotel B", 101)
 
