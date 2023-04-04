@@ -35,7 +35,6 @@ class HotelCatalog:
         print("Error: Hotel not found")
         return None
     
-    
 class Room():
     def __init__(self, room_number, room_type, max_people, price_room, facilities_detail, bed_type, status):
         self.room_number = room_number
@@ -45,7 +44,7 @@ class Room():
         self.facilities_detail = facilities_detail
         self.bed_type = bed_type
         self.room_status = status
-    
+
     def update_status(self, hotel,room_catalog:object):
         self.room_status = not self.room_status
         self.room_catalog = room_catalog
@@ -248,6 +247,9 @@ class Booking:
     def set_add_on_price(self):
         self.service_price = self.result[3]
         print(self.service_price)
+
+    def get_customer_name(self,):
+        return self.
 
 
 class Catalog_creditcard:
