@@ -249,7 +249,7 @@ class Booking:
         print(self.service_price)
 
     def get_customer_name(self,):
-        return self.
+        return self.customer_nam
 
 
 class Catalog_creditcard:
