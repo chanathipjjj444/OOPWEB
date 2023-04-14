@@ -1,4 +1,6 @@
-#everything in this is public
+from fastapi import FastAPI
+
+app = FastAPI()
 class Hotel:
     def __init__(self, name, rating, num_rooms, hotel_picture, location, province, hotel_room_list, add_on_hotel):
         self.name_hotel = name
@@ -33,16 +35,14 @@ class HotelCatalog:
     def add_hotel(self, hotel):
         self.hotel_list.append(hotel)
 
-    def find_hotel(self, name):
+    @app.get("/hotel")
+    async def find_hotel(self, name):
         for hotel in self.hotel_list:
             if hotel.name_hotel == name:
-                return hotel
-        print("Error: Hotel not found")
-        return None
-    
-        
-    
-    
+                return {"hotel_llist": hotel}
+            else:
+                return {"hotel_list": None}
+
     
 class Room():
     def __init__(self, room_number, room_type, max_people, price_room, facilities_detail, bed_type, status):
@@ -76,7 +76,6 @@ class Room():
 class AvailableRoom:
     def __init__(self):
         self.room_list = []
-    
     def add_room(self, room_class):
         new_room = (room_class.room_number, room_class.room_type, room_class.max_people, room_class.price_room, room_class.facilities_detail, 
                     room_class.bed_type, room_class.room_status)
@@ -482,6 +481,7 @@ spa1 = SpaService("spa","Open 9am","picture",100)
 add_on_cat.add_breakfast_service(breakfast1)
 add_on_cat.add_spa_service(spa1)
 add_on_cat.add_breakfast_service(breakfast2)
+
 
 add_on_cat2 = Addons()
 breakfast3 = BreakfastService("breakfast","sisler-salad","salad", 100)

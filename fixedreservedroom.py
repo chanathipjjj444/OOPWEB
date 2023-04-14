@@ -1,4 +1,8 @@
-#everything in this is public
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+
+
 class Hotel:
     def __init__(self, name, rating, num_rooms, hotel_picture, location, province, hotel_room_list, add_on_hotel):
         self.name_hotel = name
@@ -14,7 +18,7 @@ class Hotel:
         for room in self.room_list:
             print("Room number:",room.room_number, "type:",room.room_type,"max_people:",room.max_people,
                   "price:",room.price_room, "facilities:",room.facilities_detail, "bed type:",room.bed_type, "status:",room.room_status)
-    
+
     def show_add_on(self):
         for add_on in self.add_on_hotel:
             print("Addon in this Hotel:",add_on.add_on_list)
@@ -133,7 +137,8 @@ class Booking:
         self.check_room = []
 
         self.service_price = 0 
-        
+    
+    
     def get_room_list(self):
         return self.room_catalog.room_list
     
@@ -373,23 +378,6 @@ class Payment:
         self.__total_price = (self.__price_room * self.__total_day) + self.__add_on_price
         print("Total price:",self.__total_price)
 
-    '''
-    #add use coupon
-    def use_coupon(self):
-        
-
-        print("Do you want to use coupon")
-        requirement = input("True or False:")
-        if requirement == "True": 
-            name_coupon = input("Enter coupon code:")
-            if name_coupon in discount.total_coupon:
-                special_discount = discount.total_coupon[name_coupon]
-                self.__price_room -= special_discount
-            else:
-                print("No this coupon code name")
-        else:
-            print("Coupon not use")
-        '''
     def use_coupon(self):
         print("Do you want to use coupon:")
         requirement = input("True or False:")
