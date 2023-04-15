@@ -1,4 +1,8 @@
 from room import Booking
+from fastapi import FastAPI
+from typing import List
+from pydantic import BaseModel
+from creditcard import Catalog_creditcard
 
 class Promotion:
     def __init__(self):
@@ -8,52 +12,42 @@ class Promotion:
     def add_coupon(self, coupon):
         self.total_coupon.append(coupon)
 
-    def show_coupon_list(self):
-        for discount in self.total_coupon:
-            print("Total Coupon:",self.total_coupon)
-    
     def get_coupon_list(self):
         return self.total_coupon
 
-class Payment:
-    def __init__(self, transaction_id, payment_method):
-        self.__transaction_id = transaction_id
-        self.__payment_method = payment_method
-        self.__money = 0 
-        self.__price_room = 0
-        self.__status_payment =False
-        self.__used_coupons = []
-        self.__total_day = 0
-        self.__total_price = 0
-        self.__add_on_price = 0
-    
+class Payment():
+    def __init__(self, transaction_id : int):
+        self.money = 0
+        self.price_room = 0
+        self.status_payment = False
+        self.total_day = 0
+        self.total_price = 0
+        self.add_on_price = 0
+
     def set_price_room(self, price_room):
         if isinstance(price_room,int):
-            self.__price_room = price_room
-    
+            self.price_room = price_room
+
     def set_money(self,balance):
-        self.__money += balance
+        self.money += balance
     
     def get_price_room(self):
-        return self.__price_room
-    
-    def payment_perform(self):
-        pass
-    
+        return self.price_room
+
     def get_payment_status(self):
-        return self.__status_payment
+        return self.status_payment
     
     def set_total_day(self, difference):
-        self.__total_day += difference
-        print("Total day:",self.__total_day)
+        self.total_day += difference
+        print("Total day:",self.total_day)
 
-    def set_add_on_price(self, add_on_price, book1=Booking):
-        self.__add_on_price = book1.service_price
-        print("Add on price:",self.__add_on_price)
+    def set_add_on_price(self, add_on_price):
+        self.add_on_price = add_on_price
+        print("Add on price:",self.add_on_price)
 
     def set_total_price(self):
-        self.__total_price = (self.__price_room * self.__total_day) + self.__add_on_price
-        print("Total price:",self.__total_price)
+        self.total_price = (self.price_room * self.total_day) + self.add_on_price
+        return {"Total price:": self.total_price}
 
     def use_coupon(self, promotion : Promotion):
         print("Do you want to use coupon:")
@@ -62,40 +56,75 @@ class Payment:
             name_coupon = input("Enter coupon code:")
             for coupon in promotion.total_coupon:
                 if coupon.name_coupon == name_coupon:
-                    self.__total_price  -= coupon.value_coupon
+                    print("pre total price:",self.total_price)
+                    self.total_price  -= coupon.value_coupon
+                    print("post total price:",self.total_price)
                     break
             else:
-                print("Invalid coupon name")
-        else: 
-            print("Not use coupon")
+                return {"Error":"Not found coupon code"}
+        else:
+            return {"Announcement":"Not used coupon code"}
 
     def process_payment(self):
         print("Process Payment...........")
         print("......")
         print("...")
-        if(self.__money >= self.__total_price): #price_room must multiply day checkout-checkin
-
-            if self.use_coupon:
-                print("Total after use coupon code:",self.__total_price)
-            
+        if(self.money >= self.total_price): #price_room must multiply day checkout-checkin
             print("Success Payment!!")
-            self.__money-=self.__total_price
-            self.__status_payment = True
-            print("Payment status is True")
-            print("Your Balance is",self.__money)
-            return True
+            self.money -= self.total_price
+            print(self.money)
+            self.status_payment = True
+            return {"Success":f"Your balabce is {self.money}"}
         else:
-            print("Fail Payment")
-            return False
+            return {"Error":"Not enough money"}
+
+class PaymentModel(BaseModel):
+    money: int
+    price_room: int
+    status_payment: bool
+    total_day: int
+    total_price: int
+    add_on_price: int
+class TypeCoupon(BaseModel):
+    name_coupon: str
+    coupon_description: str
+    value_coupon: int
+
+class DiscountNumRoom(BaseModel):
+    num_room_discount: int
+    value_discount: int
 
 
+app = FastAPI()
+promotion = Promotion()
+payment1 = Payment(1)
+all_creditcard = Catalog_creditcard()
 
-class TypeCoupon:
-    def __init__(self, name_coupon, coupon_description, value_coupon):
-        self.name_coupon = name_coupon
-        self.coupon_description=coupon_description
-        self.value_coupon = value_coupon
-class DiscountNumRoom:
-    def __init__(self, num_room_discount, value_discount):
-        self.num_room_discount = num_room_discount
-        self.value_discount = value_discount
+
+@app.post("/calculate")
+def payment_perform(paymentModel : PaymentModel, transaction_id: int):
+    payment = Payment(transaction_id)
+    payment.set_money(paymentModel.money)
+    payment.set_price_room(paymentModel.price_room)
+    payment.set_total_day(paymentModel.total_day)
+    payment.set_add_on_price(paymentModel.add_on_price)
+    payment.set_total_price()
+    payment.use_coupon(promotion)
+    return payment.process_payment()
+
+@app.get("/get_payment_status")
+def get_payment_status():
+    return payment1.money
+
+@app.post("/add_coupon")
+def add_coupon(coupon : TypeCoupon):
+    promotion.add_coupon(coupon)
+    return promotion.get_coupon_list()
+
+@app.get("/get_coupon_list")
+def get_coupon_list():
+    return promotion.get_coupon_list()
+
+#todo
+#1. add coupon
+#2. make payment
