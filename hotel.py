@@ -2,20 +2,29 @@ from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
 
-class Room(BaseModel):
-    room_type: str
-    num_rooms: int
-
-class Hotel(BaseModel):
-    name_hotel: str
-    room_list: List[Room]
-
-
 app = FastAPI()
 
+class HotelCatalog:
+    def __init__(self):
+        self.hotel_list = []
+
+    def add_hotel(self, hotel): #done
+        self.hotel_list.append(hotel)
+
+    def find_hotel(self, name): #done
+        for hotel in self.hotel_list:
+            if hotel.name_hotel == name:
+                return hotel
+            return ("Error: Hotel not found")
+
+    def show_add_on(self, HotelName):
+        for hotel in self.hotel_list:
+            if hotel.name_hotel == HotelName:
+                return hotel.add_on_hotel
+        return ("Error: Hotel not found")
 
 class Hotel:
-    def __init__(self, name, rating, num_rooms, hotel_picture, location, province, hotel_room_list, add_on_hotel):
+    def __init__(self, name:str, rating:int, num_rooms:int, hotel_picture:str, location:str, province:str, hotel_room_list:list, add_on_hotel:str):
         self.name_hotel = name
         self.rating = rating
         self.num_rooms = num_rooms
@@ -25,67 +34,40 @@ class Hotel:
         self.room_list = hotel_room_list
         self.add_on_hotel = add_on_hotel
 
-    def show_room(self):
-        for room in self.room_list:
-            print("Room number:",room.room_number, "type:",room.room_type,"max_people:",room.max_people,
-                  "price:",room.price_room, "facilities:",room.facilities_detail, "bed type:",room.bed_type, "status:",room.room_status)
+
+    ##################### เเก้เพิ่มหลังจากเห็นไฟล์ room.py ############################
+    # def show_room(self):
+    #     for room in self.room_list:
+    #         return("Room number:",room.room_number, "type:",room.room_type,"max_people:",room.max_people,
+    #               "price:",room.price_room, "facilities:",room.facilities_detail, "bed type:",room.bed_type, "status:",room.room_status)
     
-    def show_add_on(self):
-        for add_on in self.add_on_hotel:
-            print("Addon in this Hotel:",add_on.add_on_list)
-
-class HotelCatalog:
-    def __init__(self):
-        self.hotel_list = []
-
-    def add_hotel(self, hotel:Hotel):
-        self.hotel_list.append(hotel)
-
-    def find_hotel(self, name):
-        for hotel in self.hotel_list:
-            if hotel.name_hotel == name:
-                pass
-                # return hotel
-        print("Error: Hotel not found")
-        # return None
-
-
-
-hotel1 = Hotel("Hotel A", 4, 100, "picture", "Thailand", "Chonburi", ["a","b","c"], "add_on_hotel")
-# hotel2 = Hotel("Hotel B", 5, 200, "picture", "Thailand", "Chonburi", ["a","b","c"], "add_on_hotel")
 
 catalog = HotelCatalog()
 
-    # @app.get("/hotels")
-    # def show_hotel():
-    #     return catalog.hotel_list
+@app.get("/hotels")
+async def show_hotel():
+    return catalog.hotel_list
 
-    # @app.get("/hotels/{name}")
-    # def show_hotel1(name: str):
-    #     return catalog.find_hotel(name)
+@app.get("/hotels/{name}")
+async def show_hotel1(name: str):
+    return catalog.find_hotel(name)
+
+class HotelToAdd(BaseModel):
+    name_hotel: str
+    rating: int
+    num_rooms: int = 100
+    hotel_picture: None | str = None
+    location: str = "Thailand"
+    province: str 
+    room_list: List[str]
+    add_on_hotel: None | str = None
 
 @app.post("/hotels")
-async def add_hotel(hotel):
+def add_hotel(hotel: HotelToAdd):
     catalog.add_hotel(hotel)
     return {"message": "Hotel added successfully"}
 
-add_hotel(hotel1)
+@app.get("/hotels/{name}/rooms")
+def show_add_on(name: str):
+    return catalog.show_add_on(name)
 
-
-
-# @app.post("/hotels")
-# def add_hotel(hotel: Hotel):
-#     catalog.add_hotel(hotel)
-#     return {"message": "Hotel added successfully"}
-
-# @app.post("/hotels")
-# async def add_hotel(hotel: Hotel):
-#     catalog.add_hotel(hotel)
-#     return "{hotel.name_hotel} added"
-
-# @app.get("/findhotel/{name}")
-# async def show_room(catalog: HotelCatalog, name: str):
-#     catalog.find_hotel(name)
-#     return catalog.find_hotel(name)
-
-# add_hotel(hotel1)
