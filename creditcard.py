@@ -5,7 +5,7 @@ class Catalog_creditcard:
         self.card_name_list=[]
         self.cvv_card_list=[]
         self.balance_list =[]
-    
+
     def manage_card(self):
         for i in self.creditcard_list:
             collect = i.split("-")
@@ -70,3 +70,4 @@ class Creditcard():
             print("Success access balance")
         else:
             print("Error Insert Money!!!!")
+
