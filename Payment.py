@@ -16,6 +16,7 @@ class Promotion:
 
 class Payment():
     def __init__(self, transaction_id : int):
+        self.transaction_id = transaction_id
         self.money = 0
         self.price_room = 0
         self.status_payment = False
