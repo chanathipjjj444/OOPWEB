@@ -1,7 +1,3 @@
-from fastapi import FastAPI
-
-
-
 class Profile:
     def __init__(self, prefix, name, surname, email, phone_number):
         self._prefix = prefix
