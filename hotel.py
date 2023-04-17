@@ -7,7 +7,6 @@ app = FastAPI()
 class HotelCatalog:
     def __init__(self):
         self.hotel_list = []
-
     def add_hotel(self, hotel): #done
         self.hotel_list.append(hotel)
 
@@ -40,17 +39,6 @@ class Hotel:
     #     for room in self.room_list:
     #         return("Room number:",room.room_number, "type:",room.room_type,"max_people:",room.max_people,
     #               "price:",room.price_room, "facilities:",room.facilities_detail, "bed type:",room.bed_type, "status:",room.room_status)
-    
-
-catalog = HotelCatalog()
-
-@app.get("/hotels")
-async def show_hotel():
-    return catalog.hotel_list
-
-@app.get("/hotels/{name}")
-async def show_hotel1(name: str):
-    return catalog.find_hotel(name)
 
 class HotelToAdd(BaseModel):
     name_hotel: str
@@ -61,13 +49,4 @@ class HotelToAdd(BaseModel):
     province: str 
     room_list: List[str]
     add_on_hotel: None | str = None
-
-@app.post("/hotels")
-def add_hotel(hotel: HotelToAdd):
-    catalog.add_hotel(hotel)
-    return {"message": "Hotel added successfully"}
-
-@app.get("/hotels/{name}/rooms")
-def show_add_on(name: str):
-    return catalog.show_add_on(name)
 
