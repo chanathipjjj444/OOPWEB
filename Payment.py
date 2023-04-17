@@ -1,8 +1,7 @@
-from room import Booking
 from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
-from creditcard import Catalog_creditcard
+from creditcard import Allcreditcard
 
 class Promotion:
     def __init__(self):
@@ -28,7 +27,8 @@ class Payment():
         if isinstance(price_room,int):
             self.price_room = price_room
 
-    def set_money(self,balance):
+    def set_money(self,balance : int):
+        # receive monet from a creditcard function
         self.money += balance
     
     def get_price_room(self):
@@ -98,7 +98,7 @@ class DiscountNumRoom(BaseModel):
 app = FastAPI()
 promotion = Promotion()
 payment1 = Payment(1)
-all_creditcard = Catalog_creditcard()
+all_creditcard = Allcreditcard()
 
 
 @app.post("/calculate")
