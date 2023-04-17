@@ -1,47 +1,43 @@
 class Addons:
     def __init__(self):
         self.add_on_list  =[]
-    '''    
-    def get_addons(self, detail, all_services):
-        addons = (all_services.__type_food)
-        self.__detail = detail
-        self.__add_on_list.append(addons)
-    '''
+
     def add_breakfast_service(self, breakfast):
-        breakfast_list=(breakfast.detail ,breakfast.type_food, breakfast.price_food)
+        breakfast_list=(breakfast.type_service, breakfast.detail ,breakfast.type_food, breakfast.price_food)
         self.add_on_list.append(breakfast_list)
+
+    def add_spa_service(self, spa):
+        spa_list=(spa.type_service, spa.detail, spa.spa_picture, spa.price_spa)
+        self.add_on_list.append(spa_list)
     
     def get_add_on_list(self):
         return self.add_on_list
-    
+
 class BreakfastService():
-    def __init__(self, detail, type_food, price_food):
+    def __init__(self, type_service, detail, type_food, price_food):
+        self.type_service = type_service
         self.detail = detail
         self.type_food = type_food
         self.price_food = price_food
-    '''
-    def get_detail(self):
-        return self.detail
-    def get_type_food(self):
-        return self.type_food
-    def get_price_food(self):
-        return self.price_food
-    '''
+
 class SpaService:
-    def __init__(self, detail,reserve_spa, price_service):
+    def __init__(self, type_service, detail, spa_picture, price_spa):
+        self.type_service = type_service
         self.detail = detail
-        self.reserve_spa = reserve_spa
-        self.price_service = price_service
+        self.spa_picture = spa_picture
+        self.price_spa = price_spa
 
 class ActivityService:
-    def __init__(self, detail, date_activity, price_activity, num_person):
+    def __init__(self, type_service, detail, date_activity, num_person, price_activity):
+        self.type_service = type_service
         self.detail = detail
         self.data_activity = date_activity
-        self.price_activity = price_activity
         self.num_person = num_person
+        self.price_activity = price_activity
 
 class TaxiService:
-    def __init__(self, detail,number_taxi, fees_taxi, contact_taxi):
+    def __init__(self, type_service, detail,number_taxi, fees_taxi, contact_taxi):
+        self.type_service = type_service
         self.detail = detail
         self.number_taxi = number_taxi
         self.fees_taxi = fees_taxi
