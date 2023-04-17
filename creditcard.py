@@ -64,38 +64,5 @@ class Creditcard():
                 return allcreditcard.balance_list[allcreditcard.card_number_list.index(i)]
         return {"Error": "Card number not found"}
 
-app = FastAPI()
-allcreditcard = Allcreditcard()
 
-@app.post("/addcard")
-def add_card(creditcard: CreditCardModel):
-    allcreditcard.add_card(creditcard)
-    allcreditcard.manage_card()
-    return {"Success": f"{allcreditcard.card_number_list}",
-            "Success2": f"{allcreditcard.card_name_list}",
-            "Success3": f"{allcreditcard.cvv_card_list}"}
-
-@app.get("/getbalance")
-def get_balance(card_number: int):
-    return allcreditcard.get_balance(card_number)
-
-@app.get("/getcardnumber")
-def get_card_number():
-    return allcreditcard.card_number_list
-
-@app.get("/getcardname")
-def get_card_name():
-    return allcreditcard.card_name_list
-
-@app.get("/getcvvcard")
-def get_cvv_card():
-    return allcreditcard.cvv_card_list
-
-@app.get("/getbalance")
-def get_balance():
-    return Creditcard.get_balance(allcreditcard)
-
-@app.get("/getbalance")
-def get_balance(card_number: int):
-    return allcreditcard.get_balance(card_number)
 
