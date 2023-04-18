@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+
+        body {           
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d6efd;
+        }
+
+        .block {
+            width: 500px;
+            height: min-content;
+            padding: 50px;
+            border-radius: 15px;
+            background: #ffff;
+        }
+
+        .block h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .block form {
+            font-size: 20px;
+        }
+
+        .block form input[type="submit"]{
+            font-size: 20px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 18px;
+        }
+      </style>
+</head>
+<body>
+
+    <div class="block">
+        <h1>Register</h1>
+
+        <form>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control">
+            </div>
+            <input type="submit" class="btn btn-primary w-100" value="Submit">
+        </form>
+
+        <p>Already registered <a href="login.html">Login Now.</a></p>
+    </div>  
+
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+
+        body {           
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d6efd;
+        }
+
+        .block {
+            width: 500px;
+            height: min-content;
+            padding: 50px;
+            border-radius: 15px;
+            background: #ffff;
+        }
+
+        .block h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .block form {
+            font-size: 20px;
+        }
+
+        .block form input[type="submit"]{
+            font-size: 20px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 18px;
+        }
+      </style>
+</head>
+<body>
+
+    <div class="block">
+        <h1>Login</h1>
+
+        <form action="/check_account" method="get">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" class="form-control">
+            </div>
+            <input type="submit" class="btn btn-primary w-100" value="Login">
+        </form>
+
+        <p>Don't have account yet?<a href="register.html">Register.</a></p>
+    </div>  
+<!-- 
+    <script type="text/javascript">
+        function submitLoginForm(event){
+            event.preventDefault();
+
+            console.log(event.target['femail'].value);
+        }
+    </script> -->
+
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>

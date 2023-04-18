@@ -1,6 +1,10 @@
-from fastapi import FastAPI
+from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
+
+TEMPLATE = Jinja2Templates("html")
 class Profile:
     def __init__(self, prefix, name, surname, email, phone_number):
         self._prefix = prefix
@@ -65,12 +69,12 @@ class Login:
             if admin.id == account.id and admin.password == account.password:
                 return print("ซ้ำโว้ยยย")
             else:
-                return print(account.id, account.password)
+                return account
         for user in self.__user_list:
             if user.id == account.id and user.password == account.password:
                 return print("ซ้ำโว้ยยย")
             else:
-                return print(account.id, account.password)
+                return account
 
     def show_detail(self, account):
         view_account = {
@@ -95,5 +99,26 @@ async def get_user(name:str):
     for detail in login.user_list:
         if  detail.name == name:
             return login.show_detail(detail)
+        
+@app.get("/list_account")
+async def get_list():
+    return {"list" : login.user_list}
 
-print(login.show_detail(user))
+@app.get("/chack_account",response_class=HTMLResponse)
+async def check(request: Request, email, password):
+    account = User(email, password)
+    page_data = {"request": request}
+    page_data["user"] = login.check_id(account)
+    return TEMPLATE.TemplateResponse("register.html", page_data)
+
+
+@app.post("/list_account")
+async def add_account(name, id, password):
+    account = User(name, id, password)
+    login.user_list.append(account)
+    return {"Data" : login.user_list}
+
+# r = requests.get("http://127.0.0.1:8000/list_account")
+# print(r.json())
+
+# print(login.show_detail(user))
