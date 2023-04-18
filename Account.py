@@ -104,11 +104,21 @@ async def get_user(name:str):
 async def get_list():
     return {"list" : login.user_list}
 
-@app.get("/chack_account",response_class=HTMLResponse)
-async def check(request: Request, email, password):
-    account = User(email, password)
+@app.get("/login",response_class=HTMLResponse)
+async def webLogin(request: Request):
     page_data = {"request": request}
-    page_data["user"] = login.check_id(account)
+    return TEMPLATE.TemplateResponse("login.html", page_data)
+
+@app.get("/register",response_class=HTMLResponse)
+async def WebRegister(request: Request):
+    page_data = {"request": request}
+    return TEMPLATE.TemplateResponse("register.html", page_data)
+
+@app.get("/add_account",response_class=HTMLResponse)
+async def check(request: Request, name, email, password):
+    account = User(name, email, password)
+    page_data = {"request": request}
+    login.user_list.append(login.check_id(account))
     return TEMPLATE.TemplateResponse("register.html", page_data)
 
 

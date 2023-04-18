@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <style>
 
         body {           
@@ -49,7 +49,7 @@
     <div class="block">
         <h1>Login</h1>
 
-        <form action="/check_account" method="get">
+        <form action="/add_account" method="get">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" class="form-control">
@@ -61,17 +61,9 @@
             <input type="submit" class="btn btn-primary w-100" value="Login">
         </form>
 
-        <p>Don't have account yet?<a href="register.html">Register.</a></p>
+        <p>Don't have account yet?<a href="register">Register.</a></p>
     </div>  
-<!-- 
-    <script type="text/javascript">
-        function submitLoginForm(event){
-            event.preventDefault();
 
-            console.log(event.target['femail'].value);
-        }
-    </script> -->
-
-<script src="js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
 </body>
 </html>
