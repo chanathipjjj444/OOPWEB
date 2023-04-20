@@ -2,27 +2,31 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 
-from AddOns import Addons,BreakfastService,SpaService,TaxiService,ActivityService
-from room import Room,RoomList,Booking
+from fastapi.templating import Jinja2Templates
+from fastapi import  Request
+from fastapi.responses import HTMLResponse
+
+from AddOns import Addons,BreakfastService,SpaService,TaxiService,ActivityService,add_on_cat,breakfast1,breakfast2,spa1
+from room import Room,Booking
 from hotel import Hotel,HotelCatalog,catalog
+from history import OrderHistory
 
 app = FastAPI()
 
 room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', True)
 room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', True)
-add_on_cat = Addons()
-breakfast1 = BreakfastService("breakfast","corn soup","soup", 100)
-breakfast2 = BreakfastService("breakfast","sisler salad","salad",120)
-spa1 = SpaService("spa","Open 9am","picture",100)
-add_on_cat.add_breakfast_service(breakfast1)
-add_on_cat.add_spa_service(spa1)
-add_on_cat.add_breakfast_service(breakfast2)
 
-hotel1 = Hotel('Hotel A', 5, 2, "A", "Lardprao", "Bangkok", [room1],[add_on_cat])
-#hotel1.add_room(room1)
-#hotel1.add_room(room2)
+
+hotel1 = Hotel('Hotel A', 5, 2, "A", "Lardprao", "Bangkok")
+hotel1.add_room(room1)
+hotel1.add_room(room2)
+hotel1.add_addons(breakfast1)
+hotel1.add_addons(spa1)
+hotel1.add_addons(breakfast2)
+
 catalog = HotelCatalog()
 catalog.add_hotel(hotel1)
+order_history = OrderHistory()
 
 class BreakfastServiceRequest(BaseModel):
     type_service: str
@@ -39,9 +43,7 @@ class SpaServiceRequest(BaseModel):
 
 addons = Addons()
 
-@app.get("/addons")
-async def get_add_on_list():
-    return {"add_on_list": addons.get_add_on_list()}
+
 
 class RoomToAdd(BaseModel):
     room_number: int
@@ -58,6 +60,9 @@ class RoomToAdd(BaseModel):
             if room.room_number == self.room_number:
                 room.room_status = self.room_status
                 break
+    def set_room_price(self, num_days):
+        
+        return self.price_room * num_days
 
 
 class HotelToAdd(BaseModel):
@@ -79,7 +84,7 @@ class HotelToAdd(BaseModel):
 @app.post("/hotels")
 async def add_hotel(hotel: HotelToAdd):
     
-    hotel_obj = Hotel(hotel.name_hotel, hotel.rating, hotel.num_rooms, hotel.hotel_picture,hotel.location, hotel.province, [], [])
+    hotel_obj = Hotel(hotel.name_hotel, hotel.rating, hotel.num_rooms, hotel.hotel_picture,hotel.location, hotel.province)
     catalog.add_hotel(hotel_obj)
     return hotel_obj
 
@@ -125,38 +130,56 @@ async def find_available_room(hotel_name:str):
 
     return {"hotel_name":hotel_name,"available_room":catalog.available_rooms}
 
-@app.post("/book_room")
-def book_room(check_in : str,check_out:str,num_people:int,num_room:int, hotel_name: str, room_number: int):
+
+
+
+TEMPLATE = Jinja2Templates("html")
+@app.get("/book_room_web",response_class=HTMLResponse)
+async def webBooking(request: Request):
+    page_data = {"request": request}
+    return TEMPLATE.TemplateResponse("booking.html", page_data)
+
+booking_reserved = []
+@app.get("/booking_room",response_class=HTMLResponse)
+async def booking_room(request: Request, check_in ,check_out,num_people,num_room, hotel_name, room_number):
     # Create an instance of Booking class
-    global booking
+    
     booking=Booking(check_in = check_in,check_out= check_out,num_people= num_people,num_room=num_room)
     
     result = booking.book_room_check(hotel_name = hotel_name, room_number = room_number,catalog = catalog)
+    page_data = {"request": request,
+                 "result": result,
+                "check_in_reserve": booking.date_check_in_reserve,
+                "check_out_reserve": booking.date_check_out_reserve}
+    booking_reserved.append(result)
+    booking_reserved.append(booking.check_out)
+
+    return  TEMPLATE.TemplateResponse("booking.html", page_data)
+    
+    
     # Return the result as JSON
     return {"result": result,"check in reserve": booking.date_check_in_reserve, "checkout reserve": booking.date_check_out_reserve}
+    #return {"result": result,"check in reserve": check_in_reserved,"check out reserve": check_out_reserved}
 
+@app.get("/get_status")
+async def get_booking_status():
+    return booking_reserved
 
-
-@app.post("/book_add_on")                                                                          #ยังไม่เสร็จดี
-def book_room(hotel_name:str,requirement : str, type_service : str, choice : int ):
+@app.post("/book_room")
+def book_room(check_in : str,check_out:str,num_people:int,num_room:int, hotel_name: str, room_number: int):
     # Create an instance of Booking class
-
     
-    booking.booking_add_on(hotel_name = hotel_name , requirement= requirement, type_input= type_service ,choice= choice, catalog = catalog)
+    booking=Booking(check_in = check_in,check_out= check_out,num_people= num_people,num_room=num_room)
+    
+    result = booking.book_room_check(hotel_name = hotel_name, room_number = room_number,catalog = catalog, order_history = order_history )
+    
+    
     # Return the result as JSON
-    return booking.result
-
-
-
+    return {"result": result,"order history":order_history.history}
+    #return {"result": result,"check in reserve": check_in_reserved,"check out reserve": check_out_reserved}
 
 @app.get("/hotels/{name}/rooms")
 def show_add_on(name: str):
     return catalog.show_add_on(name)
 
-
-
-book1=Booking("13-3-2021","15-3-2021",3,1)
-
-book1.booking_add_on("Hotel A","True","breakafast",1,catalog)
-
-#เหลือตรง add_on
+#ยังเหลือเรื่อง การเพิ่มข้อมูล add_on และการbook_add_on
