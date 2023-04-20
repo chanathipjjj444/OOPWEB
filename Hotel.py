@@ -1,19 +1,13 @@
-from fastapi import FastAPI
-from typing import List
-from pydantic import BaseModel
-
-
-app = FastAPI()
 class Hotel:
-    def __init__(self, name_hotel, rating, num_rooms, hotel_picture, location, province, room_list, add_on_hotel):
+    def __init__(self, name_hotel, rating, num_rooms, hotel_picture, location, province):
         self.name_hotel = name_hotel
         self.rating = rating
         self.num_rooms = num_rooms
         self.hotel_picture = hotel_picture
         self.location = location
         self.province = province
-        self.room_list = room_list
-        self.add_on_hotel = add_on_hotel
+        self.room_list = []
+        self.add_on_hotel = []
 
     def show_room(self):
         for room in self.room_list:
@@ -63,7 +57,17 @@ class HotelCatalog:
             for room in hotel.room_list:
                 if room.room_status == True:
                     self.available_rooms.append(room)
-            return  self.available_rooms
+                    return  self.available_rooms
+                else:
+                    return {"No room available"}
+        
+    def find_add_on(self, name):
+
+        hotel =self.find_hotel(name)
+
+        if hotel:
+            for add_on in hotel.add_on_hotel:
+                print(add_on) 
         else:
             return None
     
