@@ -2,31 +2,40 @@ from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
 
-class Allcreditcard:
-    def __init__(self):
-        self.creditcard_list = []
-        self.card_number_list =[]
-        self.card_name_list=[]
-        self.cvv_card_list=[]
-        self.balance_list =[]
-
-    def manage_card(self): #done
-        for i in self.creditcard_list:
-            if type(i) is CreditCardModel:
-                self.card_number_list.append(i.card_number)
-                self.card_name_list.append(i.card_name)
-                self.cvv_card_list.append(i.card_cvv)
-                self.balance_list.append(i.card_balance)
-                self.creditcard_list.pop(self.creditcard_list.index(i))
-
-    def add_card(self, card): #done
-        self.creditcard_list.append(card)
 
 class CreditCardModel(BaseModel):
     card_number: int
-    card_name : str
+    name : str
     card_cvv : int
     card_balance: int | None = None
+    surname : str
+
+class Allcreditcard:
+    def __init__(self):
+        self.creditcard_list = []
+
+
+        # self.card_number_list =[]
+        # self.card_name_list=[]
+        # self.cvv_card_list=[]
+        # self.balance_list =[]
+
+    # def manage_card(self): #done
+    #     for i in self.creditcard_list:
+    #         if type(i) is CreditCardModel:
+    #             self.card_number_list.append(i.card_number)
+    #             self.card_name_list.append(i.card_name)
+    #             self.cvv_card_list.append(i.card_cvv)
+    #             self.balance_list.append(i.card_balance)
+    #             self.creditcard_list.pop(self.creditcard_list.index(i))
+
+    def add_card(self, card : CreditCardModel): #done
+        self.creditcard_list.append(card)
+
+    def check_card_from_user(self, cardnumber : int, cvv : int):
+        for i in self.creditcard_list:
+            if i.card_number == cardnumber and i.card_cvv == cvv:
+                return i.card_balance
 
 class Creditcard():
     def __init__(self, card_number, card_name, cvv_card):

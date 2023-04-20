@@ -8,7 +8,7 @@ class Room():
         self.facilities_detail = facilities_detail
         self.bed_type = bed_type
         self.room_status = status
-    
+
     def update_status(self, hotel):
         self.room_status = not self.room_status
         for room in hotel.room_list:
@@ -16,18 +16,8 @@ class Room():
                 room.room_status = self.room_status
                 break
 
-class RoomList:
-    def __init__(self):
-        self.room_list = []
-    
-    def add_room(self, room_class):
-        new_room = (room_class.room_number, room_class.room_type, room_class.max_people, room_class.price_room, room_class.facilities_detail, 
-                    room_class.bed_type, room_class.room_status)
-        self.room_list.append(new_room)
-
 class Booking:
-    def __init__(self, room_catalog, check_in, check_out, num_people, num_room):
-        self.room_catalog = room_catalog
+    def __init__(self, check_in, check_out, num_people, num_room):
         self.num_people =  num_people
         self.num_room = num_room
         self.check_in = check_in
@@ -36,26 +26,25 @@ class Booking:
         self.date_check_out_reserve = ["Hotel A-101-23-3-2021","Hotel B-101-26-3-2021","Hotel B-102-15-3-2021"]
         self.check_hotel = []
         self.check_room = []
-        self.service_price = 0 
+        self.service_price = 0
+        self.chosen_hotel = ""
 
     def get_room_list(self):
         return self.room_catalog.room_list
 
     def book_room_check(self, hotel_name, room_number, catalog: HotelCatalog):
-        hotel = catalog.find_hotel(hotel_name) #catalog is hotel catalog
-        self.chosen_hotel = hotel_name
-        if hotel:
-            for room in hotel.room_list:
+        self.chosenhotel = catalog.find_hotel(hotel_name) #find a hotel in hotel catalog
+        if self.chosen_hotel:
+            for room in self.chosenhotel.room_list:
                 if room.room_number == room_number: #check เลขห้อง
-                        
                         self.check_in = self.check_in.split("-")
                         for i in self.check_in :
                             self.check_in[self.check_in.index(i)] = int(i)
-
+                        
                         self.check_out = self.check_out.split("-")
                         for i in self.check_out :
                             self.check_out[self.check_out.index(i)] = int(i)
-                        
+
                         status_collect=[]
                         value_collect =0
                         value_check_true =0
@@ -105,7 +94,7 @@ class Booking:
                                 return False
 
                         if room.room_status == True and value_check_true==value_collect:
-                            room.update_status(hotel) #update_status
+                            room.update_status(self.hotel) #update_status
                             collect_in = hotel_name+"-"+str(room_number)+"-"+str(self.check_in[0])+"-"+str(self.check_in[1])+"-"+str(self.check_in[2])
                             collect_out = hotel_name+"-"+str(room_number)+"-"+str(self.check_out[0])+"-"+str(self.check_out[1])+"-"+str(self.check_out[2])
                             self.date_check_in_reserve.append(collect_in)
@@ -134,12 +123,16 @@ class Booking:
             print("Unable to find room")
         else:
             print("Unable to find hotel.")
+        
 
    
     def booking_add_on(self,catalog: HotelCatalog,  choices=["breakfast","spa","activity","taxi"]):
             hotel = catalog.find_hotel(self.chosen_hotel)
             hotel.show_add_on()
             filtered_list = [] #collect service type in hotel
+
+
+            
             print("Do you want addon")
             requirement = input("True or False:")
             if requirement == "True":

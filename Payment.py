@@ -5,7 +5,7 @@ from creditcard import Allcreditcard
 
 class Promotion:
     def __init__(self):
-        self.total_coupon= [] #list of Typecoupon
+        self.total_coupon= [] #list of coupon
         self.total_discount_num_room_list = [] #list of discountnumroom
 
     def add_coupon(self, coupon):
@@ -31,6 +31,7 @@ class Payment():
     async def set_money(self,balance : int):
         # receive monet from a creditcard function
         self.money += balance
+        
     
     async def get_price_room(self):
         return self.price_room
@@ -48,7 +49,7 @@ class Payment():
 
     async def set_total_price(self):
         self.total_price = (self.price_room * self.total_day) + self.add_on_price
-        return {"Total price:": self.total_price}
+        
 
     async def use_coupon(self, promotion : Promotion):
         print("Do you want to use coupon:")
