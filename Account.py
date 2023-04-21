@@ -51,7 +51,6 @@ class Admin:
     
 class Login:
     def __init__(self):
-        self.__admin_list = []
         self.__user_list = []
     
     @property
@@ -62,19 +61,7 @@ class Login:
         if type(self.check_id(user)) != str:
             self.__user_list.append(user)
 
-    def add_admin(self, admin):
-        if type(self.check_id(admin)) != str:
-            self.__admin_list.append(admin)
-
     def check_id(self, account):
-        for admin in self.__admin_list:
-            if admin.id != account.id:
-                if admin.id == account.id and admin.password == account.password:
-                    return "ซ้ำโว้ยยย"
-                else:
-                    return account
-            else:
-                return "ID ซ้ำาา"
         for user in self.__user_list:
             if user.id != account.id:
                 if user.id == account.id and user.password == account.password:
@@ -95,11 +82,9 @@ class Login:
 
 user = User("Tung","kiki123@gmail.com","12345678")
 user2 = User("Tung","kiki123@gmail.com","12345678")
-admin = Admin("Tung","kiki123@gmail.com","1234567")
 
 login = Login()
 login.add_user(user)
-login.add_admin(user)
 login.add_user(user2)
 print(login.user_list)
 
@@ -133,7 +118,6 @@ async def add(request: Request, name, email, password):
     user = User(name, email, password)
     admin = Admin(name, email, password)
     login.add_user(user)
-    login.add_admin(admin)
     page_data = {"request": request}
     return TEMPLATE.TemplateResponse("login.html", page_data)
 
