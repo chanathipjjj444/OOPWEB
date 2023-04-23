@@ -10,3 +10,4 @@ class OrderHistory:
                   "Total room:",history.num_room, 
                   "Hotel name:",history.hotel_name, 
                   "Room number:",history.room_number)
+order_history = OrderHistory()
