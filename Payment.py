@@ -1,29 +1,59 @@
-class Payment:
-    def __init__(self, total, transaction_id, payment_method, card_number, card_name, card_expire, cvv_card, vat):
-        self.__total=total
-        self.__transaction_id = transaction_id
-        self.__payment_method = payment_method
-        self.__card_number = card_number
-        self.__card_name = card_name
-        self.__card_expire = card_expire
-        self.__cvv_card = cvv_card
-        self.__vat = vat
-    def payment_perform(self):
-        pass
-    def get_payment_status(self):
-        pass
-class Promotion:
-    def __init__(self, typecoupon, discountnumroom):
-        self.__total_coupon= typecoupon #list of Typecoupon
-        self.__total_discount_num_room_list = discountnumroom #list of discountnumroo 
+from promotion import Promotion
+from fastapi import FastAPI
+from typing import List
+from pydantic import BaseModel
+from creditcard import Allcreditcard,CreditCardModel
 
-class TypeCoupon:
-    def __init__(self, value_coupon, pr, coupon_description):
-        self.__value_coupon = value_coupon
-        self.__pr=pr
-        self.__coupon_description=coupon_description
+class Payment():
+    def __init__(self, transaction_id : int):
+        self.transaction_id = transaction_id
+        self.status_payment = False
+        self.total_day = 0
+        self.total_price = 0
 
-class DiscountNumRoom:
-    def __init__(self, num_room_discount, value_discount):
-        self.__num_room_discount = num_room_discount
-        self.__value_discount = value_discount
+    def set_booking_details(self, booking):
+        self.total_day = booking.total_days
+        self.total_price = booking.total_price
+        return {"Total days":self.total_day,"Result":self.total_price}
+
+     
+    def process_payment(self, booking,card_number, card_cvv,all_credit_cards: Allcreditcard):
+        print("Process Payment...........")
+        print("......")
+        print("...")
+        self.set_booking_details(booking)
+        card_balance = all_credit_cards.check_card_from_user(card_number, card_cvv)
+        if card_balance is None:
+            return {"message": "Credit card not found"}
+
+        if card_balance < self.total_price:
+            return {"message": "Insufficient balance"}
+
+        self.status_payment = True
+        card_balance -= self.total_price #money in card
+        
+        return {"message": "Payment processed successfully", "new_balance": card_balance}
+        
+    def use_coupon(self, promotion : Promotion):
+        print("Do you want to use coupon:")
+        requirement = input("True or False:")
+        if requirement == "True":
+            name_coupon = input("Enter coupon code:")
+            for coupon in promotion.total_coupon:
+                if coupon.name_coupon == name_coupon:
+                    print("pre total price:",self.total_price)
+                    self.total_price  -= coupon.value_coupon
+                    print("post total price:",self.total_price)
+                    break
+            else:
+                return {"Error":"Not found coupon code"}
+        else:
+            return {"Announcement":"Not used coupon code"}
+        
+class PaymentModel(BaseModel):
+    money: int
+    price_room: int
+    status_payment: bool
+    total_day: int
+    total_price: int
+    add_on_price: int
