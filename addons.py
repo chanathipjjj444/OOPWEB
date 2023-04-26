@@ -1,44 +1,54 @@
 class Addons:
     def __init__(self):
         self.add_on_list  =[]
+        self.add_on_price = 0
 
-    def add_breakfast_service(self, breakfast):
-        breakfast_list=(breakfast.type_service, breakfast.detail ,breakfast.type_food, breakfast.price_food)
-        self.add_on_list.append(breakfast_list)
-
-    def add_spa_service(self, spa):
-        spa_list=(spa.type_service, spa.detail, spa.spa_picture, spa.price_spa)
-        self.add_on_list.append(spa_list)
+    def add_service(self, service):
+        service_list = (service.type_service,service.name_service,service.detail,service.picture,service.price_service)
+        self.add_on_list.append(service_list)
     
     def get_add_on_list(self):
-        return self.add_on_list
+        print(self.add_on_list)
+        
+   
+    def set_add_on_price(self, type_service, name_service):
+        for add_on in self.add_on_list:
+            if type_service == add_on[0] and name_service == add_on[1]:
+                self.add_on_price = add_on[4]
+                #print(self.__add_on_price)
+                return self.add_on_price
+        else:
+            print(self.add_on_price)
+        
 
-class BreakfastService():
-    def __init__(self, type_service, detail, type_food, price_food):
-        self.type_service = type_service
-        self.detail = detail
-        self.type_food = type_food
-        self.price_food = price_food
+class Service:
+    def __init__(self,type_service,name_service,detail,picture,price_service):
+        self.__type_service = type_service
+        self.__name_service = name_service
+        self.__detail = detail
+        self.__picture = picture
+        self.__price_service = price_service
+    @property
+    def type_service(self):
+        return self.__type_service
+    @property
+    def name_service(self):
+        return self.__name_service
+    @property
+    def detail(self):
+        return self.__detail
+    @property
+    def picture(self):
+        return self.__picture
+    @property 
+    def price_service(self):
+        return self.__price_service    
 
-class SpaService:
-    def __init__(self, type_service, detail, spa_picture, price_spa):
-        self.type_service = type_service
-        self.detail = detail
-        self.spa_picture = spa_picture
-        self.price_spa = price_spa
+add_on_cat = Addons()
 
-class ActivityService:
-    def __init__(self, type_service, detail, date_activity, num_person, price_activity):
-        self.type_service = type_service
-        self.detail = detail
-        self.data_activity = date_activity
-        self.num_person = num_person
-        self.price_activity = price_activity
-
-class TaxiService:
-    def __init__(self, type_service, detail,number_taxi, fees_taxi, contact_taxi):
-        self.type_service = type_service
-        self.detail = detail
-        self.number_taxi = number_taxi
-        self.fees_taxi = fees_taxi
-        self.contact_taxi = contact_taxi
+breakfast1 = Service("breakfast","corn soup","Enjoy","soup",100)
+add_on_cat.add_service(breakfast1)
+spa1 = Service("spa","sisler salad","Enjoy","salad",120)
+add_on_cat.add_service(spa1)
+breakfast2 = Service("breakfast","chicken burger","Enjoy","chicken",100)
+add_on_cat.add_service(breakfast2)

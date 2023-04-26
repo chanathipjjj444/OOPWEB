@@ -13,8 +13,6 @@ class CreditCardModel(BaseModel):
 class Allcreditcard:
     def __init__(self):
         self.creditcard_list = []
-
-
         # self.card_number_list =[]
         # self.card_name_list=[]
         # self.cvv_card_list=[]

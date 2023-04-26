@@ -1,165 +1,123 @@
 from hotel import HotelCatalog
+from datetime import datetime
+from orderhistory import OrderHistory
+from pydantic import BaseModel
+from addons import add_on_cat
+
 class Room():
-    def __init__(self, room_number, room_type, max_people, price_room, facilities_detail, bed_type, status):
-        self.room_number = room_number
-        self.room_type = room_type
-        self.max_people = max_people
-        self.price_room = price_room
-        self.facilities_detail = facilities_detail
-        self.bed_type = bed_type
-        self.room_status = status
+    def __init__(self, room_number, room_type, max_people, price_room, facilities_detail, bed_type, room_picture,status):
+        self.__room_number = room_number
+        self.__room_type = room_type
+        self.__max_people = max_people
+        self.__price_room = price_room
+        self.__facilities_detail = facilities_detail
+        self.__bed_type = bed_type
+        self.__room_picture = room_picture
+        self.__room_status = status
+    
 
     def update_status(self, hotel):
-        self.room_status = not self.room_status
-        for room in hotel.room_list:
-            if room.room_number == self.room_number:
-                room.room_status = self.room_status
+        self.__room_status = not self.__room_status
+        for room in hotel.get_room_list:
+            if room.__room_number == self.__room_number:
+                room.__room_status = self.__room_status
                 break
+
+    def set_room_price(self, num_days):
+        self.price = self.__price_room * num_days
+        return self.price
+    @property
+    def get_room_number(self):
+        return self.__room_number
+    @property
+    def get_room_type(self):
+        return self.__room_type
+    @property
+    def get_max_people(self):
+        return self.__max_people
+    @property
+    def get_price_room(self):
+        return self.__price_room
+    @property
+    def get_facilities_detail(self):
+        return self.__facilities_detail
+    @property
+    def get_bed_type(self):
+        return self.__bed_type
+    @property
+    def get_room_picture(self):
+        return self.__room_picture
+    @property
+    def get_room_status(self):
+        return self.__room_status
 
 class Booking:
     def __init__(self, check_in, check_out, num_people, num_room):
-        self.num_people =  num_people
+        self.check_in = datetime.strptime(check_in, '%d-%m-%Y').date()
+        self.check_out = datetime.strptime(check_out, '%d-%m-%Y').date()
+        self.num_people = num_people
         self.num_room = num_room
-        self.check_in = check_in
-        self.check_out = check_out
-        self.date_check_in_reserve = ["Hotel A-101-21-3-2021","Hotel B-101-19-3-2021","Hotel B-102-13-3-2021"]
-        self.date_check_out_reserve = ["Hotel A-101-23-3-2021","Hotel B-101-26-3-2021","Hotel B-102-15-3-2021"]
-        self.check_hotel = []
-        self.check_room = []
-        self.service_price = 0
-        self.chosen_hotel = ""
+        self.hotel_name = None
+        self.room_number = None
+        self.room_price = 0
+        self.add_on_price = 0
+        self.total_price = 0
+        self.total_days = 0
+          
+    def get_num_days(self):
+        self.total_days = (self.check_out - self.check_in).days
+        return {"total_day":self.total_days}
 
-    def get_room_list(self):
-        return self.room_catalog.room_list
+    def set_total_price(self):
+        self.total_price = self.room_price  + self.add_on_price
+        return {"total_price":self.total_price}
 
-    def book_room_check(self, hotel_name, room_number, catalog: HotelCatalog):
-        self.chosenhotel = catalog.find_hotel(hotel_name) #find a hotel in hotel catalog
-        if self.chosen_hotel:
-            for room in self.chosenhotel.room_list:
-                if room.room_number == room_number: #check เลขห้อง
-                        self.check_in = self.check_in.split("-")
-                        for i in self.check_in :
-                            self.check_in[self.check_in.index(i)] = int(i)
-                        
-                        self.check_out = self.check_out.split("-")
-                        for i in self.check_out :
-                            self.check_out[self.check_out.index(i)] = int(i)
-
-                        status_collect=[]
-                        value_collect =0
-                        value_check_true =0
-                        
-                        for i in self.date_check_in_reserve:
-                            for j in i:
-                                if(j==i[6]):
-                                    if(hotel_name[6]==j):
-                                        state_check_in = i.split("-")
-                                        room_in=int(state_check_in[1])
-                                        day_in=int(state_check_in[2])
-                                        month_in=int(state_check_in[3])
-                                        year_in=int(state_check_in[4])
-
-                        for k in self.date_check_out_reserve:
-                            for n in k:
-                                if(n==k[6]):
-                                    if(hotel_name[6]==n):
-                                        state_check_out = k.split("-")
-                                        day_out=int(state_check_out[2])
-                                        month_out=int(state_check_out[3])
-                                        year_out=int(state_check_out[4])
-
-
-                        if self.check_in[1] == month_in and int(room_in) == int(room_number):
-                            if not (day_in<= self.check_in[0] <= day_out) and not(self.num_room / self.num_people <= 0.25):
-                                status_collect.append(True)         
-                            else:
-                                status_collect.append(False)
-                        
-                        for check in status_collect:
-                            value_collect +=1
-                            if(check==True):
-                                value_check_true+=1
-                        
-                        if (self.check_in[2]%4==0 and self.check_in[2]%100 !=0) or self.check_in[2]%400:
-                                if(self.check_in[1]==2 and 1<=self.check_in[0]<=29):
-                                    print("year Atigu")
-                                if(self.check_in[1]==2 and (30<=self.check_in[0]<=31 or 30<=self.check_out[0]<=31)):
-                                    print("error insert Day")
-                                    return False
-                        else:
-                            if(self.check_in[1]==2 and 1<=self.check_in[0]<=28):
-                                print("year Pokkati")
-                            if(self.check_in[1]==2 and (29<=self.check_in[0]<=31 or 29<=self.check_out[0]<=31)):
-                                print("error insert Day")
-                                return False
-
-                        if room.room_status == True and value_check_true==value_collect:
-                            room.update_status(self.hotel) #update_status
-                            collect_in = hotel_name+"-"+str(room_number)+"-"+str(self.check_in[0])+"-"+str(self.check_in[1])+"-"+str(self.check_in[2])
-                            collect_out = hotel_name+"-"+str(room_number)+"-"+str(self.check_out[0])+"-"+str(self.check_out[1])+"-"+str(self.check_out[2])
-                            self.date_check_in_reserve.append(collect_in)
-                            self.date_check_out_reserve.append(collect_out)
-                            print("##update_checkin....")
-                            print(self.date_check_in_reserve)
-                            print("##update_checkout...")
-                            print(self.date_check_out_reserve)
-                            print("Room booked successfully!")
-                            print("Room status:",room_number,":",room.room_status) #show status
-
-
-                            self.total_day = ( int(self.check_out[0]) - int(self.check_in[0]) ) + 30*( int(self.check_out[1]) - int(self.check_in[1]) )
-                            if self.total_day ==0:
-                                self.total_day +=1
-                            print(self.total_day) #send total_day to class Payment
-                    
-
-                            self.booking_add_on() #after book room complete
-                            return True
-                        else:
-                            print("fail")
-                            print("Unable to book room.")
-                            return False
-                            
-            print("Unable to find room")
-        else:
-            print("Unable to find hotel.")
-        
-
-   
-    def booking_add_on(self,catalog: HotelCatalog,  choices=["breakfast","spa","activity","taxi"]):
-            hotel = catalog.find_hotel(self.chosen_hotel)
-            hotel.show_add_on()
-            filtered_list = [] #collect service type in hotel
-
-
+    def book_room_check(self, hotel_name, room_number, catalog: HotelCatalog, order_history: OrderHistory):
+        hotel = catalog.find_hotel(hotel_name)
+        if hotel:
             
-            print("Do you want addon")
-            requirement = input("True or False:")
-            if requirement == "True":
-                if hotel:
-                    add_on_cat = hotel.add_on_hotel[0]              #list of add_on in hotel
-                    type_input = input("Enter type_service :[breakfast,spa,activity,taxi]")
-                    for item in add_on_cat.add_on_list :                         
-                        if item[0] == type_input and type_input in choices: #watch first index breakfast spa activity taxi
-                            filtered_list.append(item)                     #ใส่เฉพาะ type_service ที่กรอก input  
-                    if len(filtered_list) > 0:                             # Not []
-                        for index, item in enumerate(filtered_list):     
-                            print("choice:",str(index+1),item[1])          #show index 1 of each filter serviece ex.breakfast service -> corn_soup ,sisler sald   
-                    if item[0] == type_input and type_input in choices:
-                        choice = int(input("enter your choice:"))
-                        if choice in range(1,len(add_on_cat.add_on_list)+1):
-                            self.result = filtered_list[choice-1]
-                            print("Booking addon success")
-                            print("Your choice is:",self.result)
-                            self.set_add_on_price()
-                    else:
-                        print("This hotel has no this service type")
+            for room in hotel.get_room_list:
+               
+                if room.get_room_number == room_number :
+                    # Check if room is available for given dates
+                                            
+                        self.hotel_name = hotel_name
+                        self.room_number = room_number
+                        order_history.history.append(self)
+                        room.update_status(hotel)
+                        self.get_num_days()
+                        #self.set_room_price(room)
+                        self.room_price =room.set_room_price(self.total_days)
+                        self.set_total_price()
 
-                else:
-                    print("Unable to find hotel")    
+                        return {"message": "Booking successful","Room number": room_number, "Room Status": room.get_room_status}
+                    
             else:
-                print("Add on is not booking")
+                return "Room not found"
+        else:
+            return "Hotel not found"
 
-    def set_add_on_price(self):
-        self.service_price = self.result[3]
-        print(self.service_price)
+    def book_add_on(self, service_type, name_service, catalog: HotelCatalog, requirement):
+        hotel = catalog.find_hotel(self.hotel_name)
+        if hotel:
+            if requirement == False:
+                return  {"No booking addon"}    
+            add_on_services = []
+            for add_on in hotel.get_add_on_hotel:
+                if add_on.type_service == service_type:
+                    add_on_services.append(add_on)
+                    
+            if len(add_on_services) >0:
+                
+                for add_on in add_on_services:
+                    if add_on.name_service == name_service:
+                        
+                        self.add_on_price = add_on_cat.set_add_on_price(service_type,name_service)
+                        self.set_total_price()
+                        return {"message": "service booked successfully", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
+                    else:
+                        return {"No this service_detail":name_service,"found in hotel":self.hotel_name}
+            else:
+                return {"No this service_type":service_type,"found in hotel":self.hotel_name}
+        else:
+            print("Unable to find hotel")

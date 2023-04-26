@@ -62,7 +62,6 @@ def get_coupon_list():
 async def show_hotel():
     return catalog.hotel_list
 
-
 @app.get("/hotels/{name}")
 async def show_hotel1(name: str):
     return catalog.find_hotel(name)
@@ -129,6 +128,7 @@ async def addcoupon(request: Request):
 async def check(request: Request):
     request_ = request.query_params
     balance = get_creditcard_balance(int(request_["cardnumber"]),int(request_["card_cvv"]))
+    print(balance)
     await payment.set_money(balance)
     await payment.set_price_room(int(request_["price_room"]))
     await payment.set_total_day(int(request_["total_day"]))
@@ -173,3 +173,4 @@ def get_creditcard_balance(card_number:int, card_cvv:int):
             return all_creditcard.creditcard_list[all_creditcard.creditcard_list.index(card)].card_balance
     print("Card cvv or card number is incorrect")
     return {"message": "Card cvv or card number is incorrect"}
+
