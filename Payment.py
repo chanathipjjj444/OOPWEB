@@ -17,7 +17,7 @@ class Payment():
         return {"Total days":self.total_day,"Result":self.total_price}
 
      
-    def process_payment(self, booking,card_number, card_cvv,all_credit_cards: Allcreditcard):
+    def process_payment(self, booking,card_number, card_cvv,all_credit_cards: Allcreditcard, promotion:Promotion):
         print("Process Payment...........")
         print("......")
         print("...")
@@ -30,8 +30,9 @@ class Payment():
             return {"message": "Insufficient balance"}
 
         self.status_payment = True
+        self.use_coupon(promotion)
         card_balance -= self.total_price #money in card
-        
+        all_credit_cards.update_card_balance(card_number,card_cvv,card_balance)
         return {"message": "Payment processed successfully", "new_balance": card_balance}
         
     def use_coupon(self, promotion : Promotion):
@@ -44,16 +45,9 @@ class Payment():
                     print("pre total price:",self.total_price)
                     self.total_price  -= coupon.value_coupon
                     print("post total price:",self.total_price)
-                    break
+                    return self.total_price
             else:
                 return {"Error":"Not found coupon code"}
         else:
             return {"Announcement":"Not used coupon code"}
         
-class PaymentModel(BaseModel):
-    money: int
-    price_room: int
-    status_payment: bool
-    total_day: int
-    total_price: int
-    add_on_price: int
