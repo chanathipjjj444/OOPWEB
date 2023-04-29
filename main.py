@@ -135,7 +135,7 @@ class Login:
                 self.__user_name = check.name
                 return self.show_detail()
         print("invalid login")
-        return {}
+        return {"message":"fail"}
         
     def show_detail(self):
         view_account = {
@@ -216,14 +216,11 @@ class Hotel:
 class HotelCatalog:
     hotel_list = []
 
-    def __init__(self,data_reserve) -> None:
-        self.__hotel_set ={}
-        self.__hotel_set.update(data_reserve)
-        self.__check_awail = list(self.__hotel_set.values())
-        self.__name = str(self.__check_awail[1])
-        self.__check_in = str(self.__check_awail[4])
-        self.__check_out = str(self.__check_awail[5])
-        self.__num_people = int(self.__check_awail[3])
+    def __init__(self) -> None:
+        self.__name = ""
+        self.__check_in = "" 
+        self.__check_out = ""
+        self.__num_people = 0
 
         
     def add_hotel(self):
@@ -252,14 +249,21 @@ class HotelCatalog:
                 return hotel
         print("Error: Hotel not found")
         
-    def find_available_room(self, hotel_name,check_in, check_out,num_people, list_hotel):
+    def find_available_room(self,data, list_hotel):
+        self.__hotel_set ={}
+        self.__hotel_set.update(data)
+        self.__check_awail = list(self.__hotel_set.values())
+        self.__name = str(self.__check_awail[1])
+        self.__check_in = str(self.__check_awail[4])
+        self.__check_out = str(self.__check_awail[5])
+        self.__num_people = int(self.__check_awail[3])
         self.__available_rooms = []
         check = 0
         self.__available_rooms_dict ={}
-        self.check_in = datetime.strptime(check_in, '%d-%m-%Y').date()
-        self.check_out = datetime.strptime(check_out, '%d-%m-%Y').date()
-        self.num_people = num_people
-        hotel = self.find_hotel(hotel_name, list_hotel)
+        self.check_in = datetime.strptime(self.__check_in, '%d-%m-%Y').date()
+        self.check_out = datetime.strptime(self.__check_out, '%d-%m-%Y').date()
+        self.num_people = self.__num_people
+        hotel = self.find_hotel(self.__name, list_hotel)
         if hotel:
             for room in hotel.get_room_list:
                 check+=1
@@ -267,7 +271,7 @@ class HotelCatalog:
                 if self.num_people > room.get_max_people:
                     continue  # skip room if num_people > max_people
                 for booking in order_history.history:
-                    if  str(booking.hotel_name) == str(hotel_name) and int(booking.room_number) == int(room.get_room_number):
+                    if  str(booking.hotel_name) == str(self.__name) and int(booking.room_number) == int(room.get_room_number):
                             # Check if the booking overlaps with the given dates
                             if self.check_out > booking.check_in and self.check_in < booking.check_out:
                                 available = False 
@@ -303,15 +307,13 @@ class HotelCatalog:
                 print("Hotel name:",hotel_name,"Service type:",add_on.type_service, "Name:",add_on.name_service, "Detail:",add_on.detail,
                       "Picture:",add_on.picture ,"Price:",add_on.price_service)
 
-
-
-    def show_hotel(self):
-        for hotel in self.__hotel_list:
-            print("Name hotel:",hotel.get_name_hotel, "Rating:",hotel.get_rating,"Num_rooms:",hotel.get_num_rooms,
-                  "hotel_picture:",hotel.get_hotel_picture, "Location:",hotel.get_location, "Province:",hotel.get_province)
-
-    def get_hotel_list(self):
-        return self.__hotel_list
+    def show_hotel(self, hotellist):
+        list_set = []
+        for hotel in hotellist:
+            item = {"Name_hotel":hotel.get_name_hotel, "Rating":hotel.get_rating,"Num_rooms":hotel.get_num_rooms,
+                "hotel_picture":hotel.get_hotel_picture, "Location":hotel.get_location, "Province":hotel.get_province}
+            list_set.append(item)
+        return list_set
 
 
 class HotelToAdd(BaseModel):
@@ -626,21 +628,47 @@ class Promotion:
 
 room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "",True)
 room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "",True)
+room3 = Room(103, 'Standard', 3, 1500, 'TV, AC', 'King', "",True)
 
-hotel1 = Hotel("Hotel A", "4.9", 10, "", "location", "sublocation")
-hotel1.add_room(room1)
-hotel1.add_room(room2)
+hotela = Hotel("Hotel A", "4.9", 10, "https://media-cdn.tripadvisor.com/media/photo-s/26/9d/77/93/entrance-hotel-artemide.jpg", "Puket", "..")
+hotelb = Hotel("Hotel B", "4.4", 10, "https://image-tc.galaxy.tf/wijpeg-2w1lrozu9m6gg4myhkj0lkgvf/43-hotel-exterior-v2-resized.jpg?width=1920", "Rayong", "..")
+hotelc = Hotel("Hotel C", "4.7", 10, "https://media-cdn.tripadvisor.com/media/photo-s/16/1a/ea/54/hotel-presidente-4s.jpg", "chaingmai", "..")
+hoteld = Hotel("Hotel D", "4.2", 10, 'https://pix10.agoda.net/hotelImages/124/1246280/1246280_16061017110043391702.jpg?ca=6&ce=1&s=1024x768', "Bankok", "..")
+hotela.add_room(room1)
+hotela.add_room(room2)
+hotela.add_room(room3)
+hotelb.add_room(room1)
+hotelb.add_room(room2)
+hotelb.add_room(room3)
+hotelc.add_room(room1)
+hotelc.add_room(room2)
+hotelc.add_room(room3)
+hoteld.add_room(room1)
+hoteld.add_room(room2)
+hoteld.add_room(room3)
+
+catalog_hotel = HotelCatalog()
+catalog_hotel.hotel_list.append(hotela)
+catalog_hotel.hotel_list.append(hotelb)
+catalog_hotel.hotel_list.append(hotelc)
+catalog_hotel.hotel_list.append(hoteld)
+
+
+
 
 addons =Addons()
 
-servicefood = Service("Breakfast","Steak","...","...",100)
-servicecar = Service("Carservice","Car","...","...",200)
-servicespa = Service("Spaservice","Spa","...","...",150)
+servicefood = Service("Breakfast","steak","...","...",100)
+servicecar = Service("Carservice","car","...","...",200)
+servicespa = Service("Spaservice","spa","...","...",150)
 
 addons.add_service(servicefood)
 addons.add_service(servicecar)
 addons.add_service(servicespa)
-hotel1.add_addons(addons.get_add_on_list())
+hotela.add_addons(addons.get_add_on_list())
+hotelb.add_addons(addons.get_add_on_list())
+hotelc.add_addons(addons.get_add_on_list())
+hoteld.add_addons(addons.get_add_on_list())
 
 credit1 = CreditCardModel(123, "test", "ttt", 555, 10000)
 
@@ -652,8 +680,11 @@ promotion1 = Promotion()
 promotion1.add_coupon(coupon1)
 
 
-
-
+@app.get("/showhotel")
+async def Showhotel():
+    response = catalog_hotel.show_hotel(catalog_hotel.hotel_list)
+    # return responses.JSONResponse(response)
+    return response
 
 
 
@@ -676,19 +707,23 @@ async def register(Insert_register : insert_register):
 async def login(Insert : insert_login):
       collect_user = Collectuser()
       login = Login(Insert)
-      response = login.check_login(collect_user.collect)
-      if response:
-         return responses.JSONResponse(response)
+      global responselogin
+      responselogin = login.check_login(collect_user.collect)
+      if responselogin:
+         return responses.JSONResponse(responselogin)
 
+@app.get("/auth")
+async def Auth():
+    if responselogin:
+        return  {"message":"success"}
+    return {"message":"fail"}
 
 
 @app.post("/reserve",response_model=insert_reserve,status_code=status.HTTP_200_OK)
 async def reserve(Insert_reserve : insert_reserve):
-    global catalog_hotel
-    catalog_hotel = HotelCatalog(Insert_reserve)
-    catalog_hotel.hotel_list.append(hotel1)
     print(catalog_hotel.hotel_list)
-    catalog_hotel.add_hotel()
+    x = catalog_hotel.find_available_room(Insert_reserve,
+    catalog_hotel.hotel_list)
     global n
     global ci
     global co
@@ -697,12 +732,6 @@ async def reserve(Insert_reserve : insert_reserve):
     ci = catalog_hotel.getter_checkin
     co = catalog_hotel.getter_checkout
     cp = catalog_hotel.getter_checkpeople
-    
-    x = catalog_hotel.find_available_room(n,
-    ci, 
-    co,
-    cp,
-    catalog_hotel.hotel_list)
     response = x
 
     # book = Booking(ci, co, cp, 1)
@@ -779,9 +808,3 @@ async def Updatehistory():
    
 
 
-
-
-
-
-
-   
