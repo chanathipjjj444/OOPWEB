@@ -8,7 +8,11 @@ from pydantic import BaseModel
 
 
 from model import (insert_register,
-   insert_login)
+   insert_login,
+   insert_reserve,
+   insert_booking,
+   insert_addon,
+   insert_credit)
 
 
 
@@ -155,8 +159,9 @@ class OrderHistory:
                   "Total room:",history.num_room, 
                   "Hotel name:",history.hotel_name, 
                   "Room number:",history.room_number)
+        
             
-# order_history = OrderHistory()
+order_history = OrderHistory()
 
 
 
@@ -181,7 +186,7 @@ class Hotel:
         self.__room_list.append(room)
         
     def add_addons(self,add_on):
-        self.__add_on_hotel.append(add_on)
+        self.__add_on_hotel=add_on
     
     @property    
     def get_name_hotel(self):
@@ -214,30 +219,55 @@ class HotelCatalog:
     def __init__(self,data_reserve) -> None:
         self.__hotel_set ={}
         self.__hotel_set.update(data_reserve)
-        self.__hotel_list = list(self.__hotel_set.values())
-        
-    def add_hotel(self, list_hotel):
-        list_hotel.append(self.__hotel_list)
+        self.__check_awail = list(self.__hotel_set.values())
+        self.__name = str(self.__check_awail[1])
+        self.__check_in = str(self.__check_awail[4])
+        self.__check_out = str(self.__check_awail[5])
+        self.__num_people = int(self.__check_awail[3])
 
-    def find_hotel(self, name):
-        for hotel in self.__hotel_list:
+        
+    def add_hotel(self):
+        # self.__check_awail
+        print(self.__check_awail)
+        return self.__check_awail
+        
+    @property
+    def getter_name(self):
+        return self.__name
+    @property
+    def getter_checkin(self):
+        return self.__check_in
+    @property
+    def getter_checkout(self):
+        return self.__check_out
+    @property
+    def getter_checkpeople(self):
+        return self.__num_people
+
+
+    def find_hotel(self, name, list_hotel):
+        for hotel in list_hotel:
             if hotel.get_name_hotel == name:
+                print("access")
                 return hotel
         print("Error: Hotel not found")
         
-    def find_available_room(self, hotel_name,check_in, check_out,num_people):
+    def find_available_room(self, hotel_name,check_in, check_out,num_people, list_hotel):
         self.__available_rooms = []
+        check = 0
+        self.__available_rooms_dict ={}
         self.check_in = datetime.strptime(check_in, '%d-%m-%Y').date()
         self.check_out = datetime.strptime(check_out, '%d-%m-%Y').date()
         self.num_people = num_people
-        hotel = self.find_hotel(hotel_name)
+        hotel = self.find_hotel(hotel_name, list_hotel)
         if hotel:
             for room in hotel.get_room_list:
+                check+=1
                 available = True
                 if self.num_people > room.get_max_people:
                     continue  # skip room if num_people > max_people
                 for booking in order_history.history:
-                    if  booking.hotel_name == hotel_name and booking.room_number == room.get_room_number:
+                    if  str(booking.hotel_name) == str(hotel_name) and int(booking.room_number) == int(room.get_room_number):
                             # Check if the booking overlaps with the given dates
                             if self.check_out > booking.check_in and self.check_in < booking.check_out:
                                 available = False 
@@ -248,18 +278,26 @@ class HotelCatalog:
                     # Check if the room is available for the given dates
                     
                         self.__available_rooms.append(room)
+                        self.__available_rooms_dict.update({f"Number{check}":room.get_room_number,f"Type{check}":room.get_room_type,f"Price{check}":room.get_price_room})
+                        
                         print("Room number:",room.get_room_number, "Type:",room.get_room_type, "Max_people:",room.get_max_people,
                               "Price:",room.get_price_room, "Facilities:",room.get_facilities_detail,"Room picture:",room.get_room_picture,
                               "Bed type:",room.get_bed_type, "Status:",room.get_room_status)
             if  len(self.__available_rooms) <= 0:
                 print("No room available")
-                return {"No room available"}
-            return self.__available_rooms
+                return {"No room available":"NO"}
+            return self.__available_rooms_dict
         else:
-            return None
+            return {"No hotel available":"NO"}
+        
+    # @property   
+    # def getter_available_rooms(self, numroom):
+    #     for checknum in self.__available_rooms:
+    #         if int(checknum.get_room_number) == int(numroom):
+    #             return checknum.get_price_room
 
-    def find_add_on(self,hotel_name):
-        hotel = self.find_hotel(hotel_name)
+    def find_add_on(self,hotel_name, list_hotel):
+        hotel = self.find_hotel(hotel_name, list_hotel.hotel_list)
         if hotel:
             for add_on in hotel.get_add_on_hotel:
                 print("Hotel name:",hotel_name,"Service type:",add_on.type_service, "Name:",add_on.name_service, "Detail:",add_on.detail,
@@ -350,18 +388,21 @@ class Addons:
         self.add_on_price = 0
 
     def add_service(self, service):
-        service_list = (service.type_service,service.name_service,service.detail,service.picture,service.price_service)
-        self.add_on_list.append(service_list)
+        
+        self.add_on_list.append(service)
+        print(self.add_on_list)
     
     def get_add_on_list(self):
         print(self.add_on_list)
+        return self.add_on_list
         
    
-    def set_add_on_price(self, type_service, name_service):
+    def set_add_on_price(self, type_service:str, name_service:str):
         for add_on in self.add_on_list:
-            if type_service == add_on[0] and name_service == add_on[1]:
-                self.add_on_price = add_on[4]
+            if type_service == add_on.type_service and name_service == add_on.name_service:
+                self.add_on_price = add_on.price_service
                 #print(self.__add_on_price)
+                print(self.add_on_price)
                 return self.add_on_price
         else:
             print(self.add_on_price)
@@ -395,11 +436,14 @@ class Service:
 # Booking file !!!!!!!!!!!!!!!
 
 class Booking:
-    def __init__(self, check_in, check_out, num_people, num_room):
+    def __init__(self, check_in:str, check_out:str, num_people:int, num_room:int):
+        self.data_set = {}
+        self.data_set.update(num_room)
+        self.__data_user = list(self.data_set.values())
         self.check_in = datetime.strptime(check_in, '%d-%m-%Y').date()
         self.check_out = datetime.strptime(check_out, '%d-%m-%Y').date()
         self.num_people = num_people
-        self.num_room = num_room
+        self.num_room = self.__data_user[0]
         self.hotel_name = None
         self.room_number = None
         self.room_price = 0
@@ -414,35 +458,38 @@ class Booking:
 
     def set_total_price(self):
         self.total_price = self.room_price  + self.add_on_price
-        return {"total_price":self.total_price}
+        return {"total_price":self.total_price,"message":"success"}
 
  
-    def book_room_check(self, hotel_name, room_number, catalog: HotelCatalog, order_history: OrderHistory):
-        hotel = catalog.find_hotel(hotel_name)
+    def book_room_check(self, hotel_name, catalog, order_history):
+        ch_ct = catalog.hotel_list
+        hotel = catalog.find_hotel(hotel_name, ch_ct)
         if hotel:
             
             for room in hotel.get_room_list:
-               
-                if room.get_room_number == room_number :
-                    # Check if room is available for given dates
+                if int(room.get_room_number) == self.num_room :
+                    # Check if room is available for given dates    
+                        
                                             
                         self.hotel_name = hotel_name
-                        self.room_number = room_number
-                        order_history.history.append(self)
+                        self.room_number = self.num_room
+                        order_history.history.append("555")
                         room.update_status(hotel)
                         self.get_num_days()
-                        #self.set_room_price(room)
+                        # self.set_room_price(room)
                         self.room_price =room.set_room_price(self.total_days)
                         self.set_total_price()
 
-                        return {"message": "Booking successful","Room number": room_number, "Room Status": room.get_room_status}
+                        
+
+                        return {"message": "Booking successful","Room number": self.num_room, "Room Status": room.get_room_status, "Price":self.total_price}
             else:
                 return "Room not found"
         else:
             return "Hotel not found"
 
-    def book_add_on(self, service_type, name_service, catalog: HotelCatalog, requirement):
-        hotel = catalog.find_hotel(self.hotel_name)
+    def book_add_on(self, service_type, name_service, catalog, requirement):
+        hotel = catalog.find_hotel(self.hotel_name, catalog.hotel_list)
         if hotel:
             if requirement == False:
                 return  {"No booking addon"}
@@ -457,15 +504,152 @@ class Booking:
                 for add_on in add_on_services:
                     if add_on.name_service == name_service:
                         
-                        self.add_on_price = add_on_cat.set_add_on_price(service_type,name_service)
+                        self.add_on_price = addons.set_add_on_price(service_type,name_service)
                         self.set_total_price()
-                        return {"message": "service booked successfully", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
+                        return {"message": "true", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
                     else:
                         return {"No this service_detail":name_service,"found in hotel":self.hotel_name}
             else:
                 return {"No this service_type":service_type,"found in hotel":self.hotel_name}
         else:
             print("Unable to find hotel")
+
+
+# Payment file !!!!!!!!!!!!!!
+
+
+class Payment:
+    def __init__(self, transaction_id : int):
+        self.transaction_id = transaction_id
+        self.status_payment = False
+        self.total_day = 0
+        self.total_price = 0
+
+    def set_booking_details(self, booking):
+        self.total_day = booking.total_days
+        self.total_price = booking.total_price
+        return {"Total days":self.total_day,"Result":self.total_price}
+    
+
+     
+    def process_payment(self, booking,card_number, card_cvv,all_credit_cards, promotion, pass_coupon):
+        print("Process Payment...........")
+        print("......")
+        print("...")
+        self.set_booking_details(booking)
+        card_balance = all_credit_cards.check_card_from_user(card_number, card_cvv)
+        if card_balance is None:
+            return {"message": "Credit card not found"}
+
+        if card_balance < self.total_price:
+            return {"message": "Insufficient balance"}
+
+        self.status_payment = True
+        self.use_coupon(pass_coupon, promotion)
+        card_balance -= self.total_price #money in card
+        all_credit_cards.update_card_balance(card_number,card_cvv,card_balance)
+        return {"message": "Payment processed successfully", "new_balance": card_balance}
+        
+    def use_coupon(self, pass_coupon , promotion):
+        requirement = "True"
+        if requirement == "True":
+            for coupon in promotion.total_coupon:
+                if coupon.name_coupon == pass_coupon:
+                    print("pre total price:",self.total_price)
+                    self.total_price  -= coupon.value_coupon
+                    print("post total price:",self.total_price)
+                    return self.total_price
+            else:
+                return {"Error":"Not found coupon code"}
+        else:
+            return {"Announcement":"Not used coupon code"}
+
+
+
+
+class CreditCardModel:
+    def __init__(self , number, name, surname, cvv, balance) -> None:
+        self.card_number = number
+        self.card_name = name
+        self.surname = surname
+        self.card_cvv = cvv 
+        self.card_balance = balance
+
+class Allcreditcard:
+    def __init__(self):
+        self.__creditcard_list = []
+
+    def add_card(self, card : CreditCardModel): #done
+        self.__creditcard_list.append(card)
+
+    def check_card_from_user(self, cardnumber : int, cvv : int):
+        for i in self.__creditcard_list:
+            if i.card_number == cardnumber and i.card_cvv == cvv:
+                return i.card_balance
+            
+
+    def update_card_balance(self, card_number, card_cvv, new_balance):
+        for creditcard in self.__creditcard_list:
+            if creditcard.card_number == card_number and creditcard.card_cvv == card_cvv:
+                creditcard.card_balance = new_balance
+                break
+    
+    @property
+    def get_creditcard_list(self):
+        return self.__creditcard_list
+
+    def show_creditcard(self):
+        for creditcard in self.__creditcard_list:
+            print("Card number:",creditcard.card_number,"Card name:","Card Surname:",creditcard.surname,creditcard.card_name,"CVV card:",creditcard.card_cvv,
+                "Card balance:",creditcard.card_balance)
+
+
+class TypeCoupon:
+    def __init__(self, name, desc, value) -> None:
+    
+        self.name_coupon= name
+        self.coupon_description= desc
+        self.value_coupon= value
+
+
+class Promotion:
+    def __init__(self):
+        self.total_coupon= [] #list of Typecoupon
+
+    def add_coupon(self, coupon:TypeCoupon):
+        self.total_coupon.append(coupon)
+
+    def get_coupon_list(self):
+        return self.total_coupon
+
+
+
+room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "",True)
+room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "",True)
+
+hotel1 = Hotel("Hotel A", "4.9", 10, "", "location", "sublocation")
+hotel1.add_room(room1)
+hotel1.add_room(room2)
+
+addons =Addons()
+
+servicefood = Service("Breakfast","Steak","...","...",100)
+servicecar = Service("Carservice","Car","...","...",200)
+servicespa = Service("Spaservice","Spa","...","...",150)
+
+addons.add_service(servicefood)
+addons.add_service(servicecar)
+addons.add_service(servicespa)
+hotel1.add_addons(addons.get_add_on_list())
+
+credit1 = CreditCardModel(123, "test", "ttt", 555, 10000)
+
+allcreditcard = Allcreditcard()
+allcreditcard.add_card(credit1)
+
+coupon1 = TypeCoupon("cost","...",500)
+promotion1 = Promotion()
+promotion1.add_coupon(coupon1)
 
 
 
@@ -497,13 +681,103 @@ async def login(Insert : insert_login):
          return responses.JSONResponse(response)
 
 
+
 @app.post("/reserve",response_model=insert_reserve,status_code=status.HTTP_200_OK)
 async def reserve(Insert_reserve : insert_reserve):
+    global catalog_hotel
     catalog_hotel = HotelCatalog(Insert_reserve)
-    catalog_hotel.add_hotel(catalog_hotel.hotel_list)
+    catalog_hotel.hotel_list.append(hotel1)
+    print(catalog_hotel.hotel_list)
+    catalog_hotel.add_hotel()
+    global n
+    global ci
+    global co
+    global cp
+    n = catalog_hotel.getter_name
+    ci = catalog_hotel.getter_checkin
+    co = catalog_hotel.getter_checkout
+    cp = catalog_hotel.getter_checkpeople
+    
+    x = catalog_hotel.find_available_room(n,
+    ci, 
+    co,
+    cp,
+    catalog_hotel.hotel_list)
+    response = x
+
+    # book = Booking(ci, co, cp, 1)
+    # response = book.book_room_check( n, 101, catalog_hotel, order_history)
+    print(response)
+    if response:
+        return responses.JSONResponse(response)
+    else:
+      raise HTTPException(status_code=400, detail="Something error")
+
+# check_in:str, check_out:str, num_people:int, num_room:int
+
+# check_in:str, check_out:str, num_people:int, num_room:int
+
+@app.post("/booking",response_model=insert_booking,status_code=status.HTTP_200_OK)
+async def Bookingg(Insert_booking : insert_booking):
+    global book
+    book = Booking(ci, co, cp, Insert_booking)
+    response= {"message":"true"}
+    
+    return responses.JSONResponse(response)
+
+@app.get("/priceroom")
+async def Setpriceroom():
+    response    = book.book_room_check(n, catalog_hotel, order_history)
+    print(response)
+    return responses.JSONResponse(response)
+
+
+@app.post("/addon",response_model=insert_addon,status_code=status.HTTP_200_OK)
+async def Addons(Insert_addon : insert_addon):
+    setup = {}
+    setup.update(Insert_addon)
+    setupp = list(setup.values())
+    book.book_add_on(setupp[0], setupp[1], catalog_hotel, True)
+    response = {'message': 'success'}
+    return responses.JSONResponse(response)
+
+@app.get("/totalprice")
+async def Totalprice():
+    response = book.set_total_price()
+    return responses.JSONResponse(response)
+
+@app.post("/payment",response_model=insert_credit,status_code=status.HTTP_200_OK)
+async def Paymentt( Insert_credit: insert_credit):
+    setup = {}
+    setup.update(Insert_credit)
+    setupp = list(setup.values())
+    allcreditcard.check_card_from_user(setupp[0],setupp[1])
+    pay = Payment(123456)
+    global responsebill
+    responsebill =pay.process_payment(book, setupp[0], setupp[1], allcreditcard, promotion1, setupp[2])
+    print(responsebill)
+    return responses.JSONResponse(responsebill)
+    
+@app.get("/bill")
+async def Bill():
+    return responses.JSONResponse(responsebill)
+
+@app.get("/updatebill")
+async def Updatehistory():
+    order_history.history.append(book)
+    print(order_history)
+    response = {"message":"success"}
+    return responses.JSONResponse(response)
+
+
+
+    
+
+
           
 
    
+
 
 
 
