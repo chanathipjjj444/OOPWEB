@@ -14,7 +14,7 @@ from model import (insert_register,
    insert_reserve,
    insert_booking,
    insert_addon,
-   insert_credit,
+   insert_debit,
    insert_formaddhotel,
    insert_formaddroom)
 
@@ -341,19 +341,7 @@ class HotelCatalog:
         return list_set
 
 
-class HotelToAdd(BaseModel):
-    name_hotel: str
-    rating: int
-    num_rooms: int = 10
-    hotel_picture: None | str = None
-    location: str = "Thailand"
-    province: str 
-    room_list = []
-    add_on_hotel = []
-    
-    # add function add room
-    def add_room(self, room):
-        self.room_list.append(room)
+
 
 
 # Room file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -488,7 +476,7 @@ class Booking:
         return {"total_price":self.total_price,"message":"success"}
 
  
-    def book_room_check(self, hotel_name, catalog, order_history):
+    def book_room_check(self, hotel_name, catalog):
         ch_ct = catalog.hotel_list
         hotel = catalog.find_hotel(hotel_name, ch_ct)
         if hotel:
@@ -496,18 +484,14 @@ class Booking:
             for room in hotel.get_room_list:
                 if int(room.get_room_number) == self.num_room :
                     # Check if room is available for given dates    
-                        
-                                            
+                                             
                         self.hotel_name = hotel_name
                         self.room_number = self.num_room
-                        order_history.history.append("555")
                         room.update_status(hotel)
                         self.get_num_days()
-                        # self.set_room_price(room)
+                        
                         self.room_price =room.set_room_price(self.total_days)
                         self.set_total_price()
-
-                        
 
                         return {"message": "Booking successful","Room number": self.num_room, "Room Status": room.get_room_status, "Price":self.total_price}
             else:
@@ -563,14 +547,14 @@ class Payment:
     
 
      
-    def process_payment(self, booking,card_number, card_cvv,all_credit_cards, promotion, pass_coupon):
+    def process_payment(self, booking,card_number, card_cvv,all_debit_cards, promotion, pass_coupon):
         print("Process Payment...........")
         print("......")
         print("...")
         self.set_booking_details(booking)
-        card_balance = all_credit_cards.check_card_from_user(card_number, card_cvv)
+        card_balance = all_debit_cards.check_card_from_user(card_number, card_cvv)
         if card_balance is None:
-            return {"message": "Credit card not found"}
+            return {"message": "Debit card not found"}
 
         if card_balance < self.total_price:
             return {"message": "Insufficient balance"}
@@ -578,7 +562,7 @@ class Payment:
         self.status_payment = True
         self.use_coupon(pass_coupon, promotion)
         card_balance -= self.total_price #money in card
-        all_credit_cards.update_card_balance(card_number,card_cvv,card_balance)
+        all_debit_cards.update_card_balance(card_number,card_cvv,card_balance)
         return {"message": "Payment processed successfully", "new_balance": card_balance}
         
     def use_coupon(self, pass_coupon , promotion):
@@ -598,7 +582,7 @@ class Payment:
 
 
 
-class CreditCardModel:
+class DebitCardModel:
     def __init__(self , number, name, surname, cvv, balance) -> None:
         self.card_number = number
         self.card_name = name
@@ -606,33 +590,33 @@ class CreditCardModel:
         self.card_cvv = cvv 
         self.card_balance = balance
 
-class Allcreditcard:
+class AllDebitcard:
     def __init__(self):
-        self.__creditcard_list = []
+        self.__debitcard_list = []
 
-    def add_card(self, card : CreditCardModel): #done
-        self.__creditcard_list.append(card)
+    def add_card(self, card : DebitCardModel): #done
+        self.__debitcard_list.append(card)
 
     def check_card_from_user(self, cardnumber : int, cvv : int):
-        for i in self.__creditcard_list:
+        for i in self.__debitcard_list:
             if i.card_number == cardnumber and i.card_cvv == cvv:
                 return i.card_balance
             
 
     def update_card_balance(self, card_number, card_cvv, new_balance):
-        for creditcard in self.__creditcard_list:
-            if creditcard.card_number == card_number and creditcard.card_cvv == card_cvv:
-                creditcard.card_balance = new_balance
+        for debitcard in self.__debitcard_list:
+            if debitcard.card_number == card_number and debitcard.card_cvv == card_cvv:
+                debitcard.card_balance = new_balance
                 break
     
     @property
-    def get_creditcard_list(self):
-        return self.__creditcard_list
+    def get_debitcard_list(self):
+        return self.__debitcard_list
 
-    def show_creditcard(self):
-        for creditcard in self.__creditcard_list:
-            print("Card number:",creditcard.card_number,"Card name:","Card Surname:",creditcard.surname,creditcard.card_name,"CVV card:",creditcard.card_cvv,
-                "Card balance:",creditcard.card_balance)
+    def show_debitcard(self):
+        for debitcard in self.__debitcard_list:
+            print("Card number:",debitcard.card_number,"Card name:","Card Surname:",debitcard.surname,debitcard.card_name,"CVV card:",debitcard.card_cvv,
+                "Card balance:",debitcard.card_balance)
 
 
 class TypeCoupon:
@@ -701,10 +685,10 @@ hotelb.add_addons(addons.get_add_on_list())
 hotelc.add_addons(addons.get_add_on_list())
 hoteld.add_addons(addons.get_add_on_list())
 
-credit1 = CreditCardModel(123, "test", "ttt", 555, 10000)
+debit1 = DebitCardModel(123, "test", "ttt", 555, 10000)
 
-allcreditcard = Allcreditcard()
-allcreditcard.add_card(credit1)
+alldebitcard = AllDebitcard()
+alldebitcard.add_card(debit1)
 
 coupon1 = TypeCoupon("cost","...",500)
 promotion1 = Promotion()
@@ -798,7 +782,6 @@ async def reserve(Insert_reserve : insert_reserve):
     response = x
 
     # book = Booking(ci, co, cp, 1)
-    # response = book.book_room_check( n, 101, catalog_hotel, order_history)
     print(response)
     if response:
         return responses.JSONResponse(response)
@@ -819,7 +802,7 @@ async def Bookingg(Insert_booking : insert_booking):
 
 @app.get("/priceroom")
 async def Setpriceroom():
-    response    = book.book_room_check(n, catalog_hotel, order_history)
+    response    = book.book_room_check(n, catalog_hotel)
     print(response)
     return responses.JSONResponse(response)
 
@@ -838,15 +821,15 @@ async def Totalprice():
     response = book.set_total_price()
     return responses.JSONResponse(response)
 
-@app.post("/payment",response_model=insert_credit,status_code=status.HTTP_200_OK)
-async def Paymentt( Insert_credit: insert_credit):
+@app.post("/payment",response_model=insert_debit,status_code=status.HTTP_200_OK)
+async def Paymentt( Insert_debit: insert_debit):
     setup = {}
-    setup.update(Insert_credit)
+    setup.update(Insert_debit)
     setupp = list(setup.values())
-    allcreditcard.check_card_from_user(setupp[0],setupp[1])
+    alldebitcard.check_card_from_user(setupp[0],setupp[1])
     pay = Payment(123456)
     global responsebill
-    responsebill =pay.process_payment(book, setupp[0], setupp[1], allcreditcard, promotion1, setupp[2])
+    responsebill =pay.process_payment(book, setupp[0], setupp[1], alldebitcard, promotion1, setupp[2])
     print(responsebill)
     return responses.JSONResponse(responsebill)
     
@@ -857,9 +840,12 @@ async def Bill():
 @app.get("/updatebill")
 async def Updatehistory():
     order_history.history.append(book)
-    print(order_history)
+    #print(order_history)
+    order_history.show_history()
     response = {"message":"success"}
     return responses.JSONResponse(response)
+
+
 
 
 
