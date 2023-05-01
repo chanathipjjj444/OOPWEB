@@ -16,7 +16,8 @@ from model import (insert_register,
    insert_addon,
    insert_debit,
    insert_formaddhotel,
-   insert_formaddroom)
+   insert_formaddroom,
+   insert_formaddaddon)
 
 
 
@@ -308,7 +309,7 @@ class HotelCatalog:
                     
                         self.__available_rooms.append(room)
                         self.__available_rooms_dict.update({f"Number{check}":room.get_room_number,f"Type{check}":room.get_room_type,f"Price{check}":room.get_price_room})
-                        
+
                         print("Room number:",room.get_room_number, "Type:",room.get_room_type, "Max_people:",room.get_max_people,
                               "Price:",room.get_price_room, "Facilities:",room.get_facilities_detail,"Room picture:",room.get_room_picture,
                               "Bed type:",room.get_bed_type, "Status:",room.get_room_status)
@@ -326,12 +327,16 @@ class HotelCatalog:
     #             return checknum.get_price_room
 
     def find_add_on(self,hotel_name, list_hotel):
-        hotel = self.find_hotel(hotel_name, list_hotel.hotel_list)
+        hotel = self.find_hotel(hotel_name, list_hotel)
+        list_sett = []
         if hotel:
             for add_on in hotel.get_add_on_hotel:
-                print("Hotel name:",hotel_name,"Service type:",add_on.type_service, "Name:",add_on.name_service, "Detail:",add_on.detail,
-                      "Picture:",add_on.picture ,"Price:",add_on.price_service)
-
+                item={"Hotel":hotel.get_name_hotel,"Service_type":add_on.type_service,"Name":add_on.name_service, "Detail":add_on.detail,
+                      "Picture":add_on.picture ,"Price":add_on.price_service}
+                list_sett.append(item)
+            return list_sett
+        return {"message":"fail"}
+            
     def show_hotel(self, hotellist):
         list_set = []
         for hotel in hotellist:
@@ -403,7 +408,6 @@ class Addons:
         self.add_on_price = 0
 
     def add_service(self, service):
-        
         self.add_on_list.append(service)
         print(self.add_on_list)
     
@@ -444,7 +448,8 @@ class Service:
         return self.__picture
     @property 
     def price_service(self):
-        return self.__price_service  
+        return self.__price_service 
+     
 
 
 
@@ -499,11 +504,9 @@ class Booking:
         else:
             return "Hotel not found"
 
-    def book_add_on(self, service_type, name_service, catalog, requirement):
+    def book_add_on(self, service_type, name_service, catalog):
         hotel = catalog.find_hotel(self.hotel_name, catalog.hotel_list)
         if hotel:
-            if requirement == False:
-                return  {"No booking addon"}
             
             add_on_services = []
             for add_on in hotel.get_add_on_hotel:
@@ -566,18 +569,15 @@ class Payment:
         return {"message": "Payment processed successfully", "new_balance": card_balance}
         
     def use_coupon(self, pass_coupon , promotion):
-        requirement = "True"
-        if requirement == "True":
-            for coupon in promotion.total_coupon:
-                if coupon.name_coupon == pass_coupon:
-                    print("pre total price:",self.total_price)
-                    self.total_price  -= coupon.value_coupon
-                    print("post total price:",self.total_price)
-                    return self.total_price
-            else:
-                return {"Error":"Not found coupon code"}
-        else:
-            return {"Announcement":"Not used coupon code"}
+        
+        for coupon in promotion.total_coupon:
+            if coupon.name_coupon == pass_coupon:
+                print("pre total price:",self.total_price)
+                self.total_price  -= coupon.value_coupon
+                print("post total price:",self.total_price)
+                return self.total_price
+            
+    
 
 
 
@@ -694,6 +694,7 @@ coupon1 = TypeCoupon("cost","...",500)
 promotion1 = Promotion()
 promotion1.add_coupon(coupon1)
 
+addaddons = Addons()
 
 
     
@@ -710,6 +711,10 @@ async def Showroom():
     response = hotel.show_room()    
     return response
 
+# @app.get("/showroomfilter")
+# async def Showroomfilter():
+#     response = hotel.show_room()    
+#     return response
 
 @app.post("/register",response_model=insert_register)
 async def register(Insert_register : insert_register):
@@ -765,8 +770,36 @@ async def manageroom(Insert_form : insert_formaddroom):
     response = {"message":"success"}
     return responses.JSONResponse(response)
 
+@app.get("/getaddons")
+async def getaddonss():
+    return responsefilteraddons
 
-@app.post("/reserve",response_model=insert_reserve,status_code=status.HTTP_200_OK)
+
+
+@app.post("/addaddons",response_model=insert_formaddaddon,status_code=status.HTTP_200_OK)
+async def manageaddon(Insert_form : insert_formaddaddon):        
+    set_data = {}
+    set_data.update(Insert_form)
+    set_data_list = list(set_data.values())
+    adddataaddon = Addons()
+    service = Service(set_data_list[0], set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4])
+    adddataaddon.add_service(service)
+    hoteladdons = catalog_hotel.find_hotel(set_data_list[5], catalog_hotel.hotel_list)
+    hoteladdons.add_addons(adddataaddon.get_add_on_list())
+    global responsefilteraddons
+    responsefilteraddons = catalog_hotel.find_add_on(set_data_list[5], catalog_hotel.hotel_list)
+    response = {"message":"success"}
+    return responses.JSONResponse(response)
+
+
+
+    # type_service,name_service,detail,picture,price_service
+    # return {""}
+
+
+
+
+@app.post("/findavailableroom",response_model=insert_reserve,status_code=status.HTTP_200_OK)
 async def reserve(Insert_reserve : insert_reserve):
     print(catalog_hotel.hotel_list)
     x = catalog_hotel.find_available_room(Insert_reserve,
@@ -779,6 +812,7 @@ async def reserve(Insert_reserve : insert_reserve):
     ci = catalog_hotel.getter_checkin
     co = catalog_hotel.getter_checkout
     cp = catalog_hotel.getter_checkpeople
+    global response
     response = x
 
     # book = Booking(ci, co, cp, 1)
@@ -796,6 +830,8 @@ async def reserve(Insert_reserve : insert_reserve):
 async def Bookingg(Insert_booking : insert_booking):
     global book
     book = Booking(ci, co, cp, Insert_booking)
+    global responsefilteraddons
+    responsefilteraddons = catalog_hotel.find_add_on(n, catalog_hotel.hotel_list)
     response= {"message":"true"}
     
     return responses.JSONResponse(response)
@@ -808,11 +844,12 @@ async def Setpriceroom():
 
 
 @app.post("/addon",response_model=insert_addon,status_code=status.HTTP_200_OK)
-async def Addons(Insert_addon : insert_addon):
+async def dataAddons(Insert_addon : insert_addon):
     setup = {}
     setup.update(Insert_addon)
     setupp = list(setup.values())
-    response=book.book_add_on(setupp[0], setupp[1], catalog_hotel, True)
+    response=book.book_add_on(setupp[0], setupp[1], catalog_hotel)
+    
     
     return responses.JSONResponse(response)
 
@@ -844,6 +881,10 @@ async def Updatehistory():
     order_history.show_history()
     response = {"message":"success"}
     return responses.JSONResponse(response)
+
+
+
+
 
 
 
