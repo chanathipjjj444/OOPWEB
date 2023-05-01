@@ -5,6 +5,8 @@ from fastapi import responses
 from fastapi import status
 from datetime import datetime
 from pydantic import BaseModel
+import subprocess
+import uvicorn
 
 
 from model import (insert_register,
@@ -12,11 +14,14 @@ from model import (insert_register,
    insert_reserve,
    insert_booking,
    insert_addon,
-   insert_credit)
+   insert_credit,
+   insert_formaddhotel,
+   insert_formaddroom)
 
 
 
 app = FastAPI()
+app.state.restart_requested = False
 
 origins =[
     'http://localhost:3000',
@@ -77,18 +82,24 @@ class User:
 
 
 class Admin:
-    def __init__(self, name, id, password):
-        self.__id = id
-        self.__password = password
-        self.__name = name
+    def __init__(self):
+        self.__email = "admin@gmail.com"
+        self.__password = "0123456789"
+        self.__auth = "true"
+    
+    # def check_admin(self, email, password):
+    #     if email == self.__email and password == self.__password:
+    #         print("success auth admin!!")
+    #         return {"auth":self.__auth}
+    #     return {"auth":"false"}
 
     @property
-    def name(self):
-        return self.__name
+    def auth(self):
+        return self.__auth
     
     @property
-    def id(self):
-        return self.__id
+    def email(self):
+        return self.__email
     
     @property
     def password(self):
@@ -102,14 +113,12 @@ class Register:
         self.__user_dict ={}
 
     def update(self, data, collect):
-        # self.__user_dict.update(data)
-        # collect.append(self.__user_dict)
         if(self.check_update(data,collect)):
             collect.append(data)
             print(self.__user_dict)
-            return  self.__user_dict
+            return  {'message':'success'}
         print(self.__user_dict)
-        return  self.__user_dict
+        return  {'message':'fail'}
     
     def check_update(self,data,collect):
         for check in collect:
@@ -128,7 +137,13 @@ class Login:
         self.__user_password = self.__data_list[1]
         self.__user_name = ""
     
-    def check_login(self, data_collect):
+    def check_login(self, data_collect, admin):
+        if self.__user_email == admin.email and self.__user_password == admin.password:
+                print("Success auth admin!!")
+                return {
+                        "auth": admin.auth,
+                        "success": "true"
+                        }
         for check in data_collect:
             if check.email == self.__user_email and check.password == self.__user_password:
                 print("Success login!!")
@@ -141,6 +156,7 @@ class Login:
         view_account = {
             "name" : self.__user_name,
             "email" : self.__user_email,
+            "auth" : "false",
             "success": "true"
         }
         return view_account
@@ -187,6 +203,15 @@ class Hotel:
         
     def add_addons(self,add_on):
         self.__add_on_hotel=add_on
+    
+    def show_room(self):
+        list_set = []
+        for room in self.__room_list:
+            item = {"roomnum":room.get_room_number, "Type":room.get_room_type,"numpeople":room.get_max_people,
+                "price":room.get_price_room, "facs":room.get_facilities_detail, "bedtype":room.get_bed_type,
+                "picture":room.get_room_picture,"status":room.get_room_status}
+            list_set.append(item)
+        return list_set
     
     @property    
     def get_name_hotel(self):
@@ -508,11 +533,15 @@ class Booking:
                         
                         self.add_on_price = addons.set_add_on_price(service_type,name_service)
                         self.set_total_price()
-                        return {"message": "true", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
+                        return {"message": "success", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
                     else:
-                        return {"No this service_detail":name_service,"found in hotel":self.hotel_name}
+                        self.add_on_price = 0
+                        self.set_total_price()
+                        return {"message": "success","price": self.add_on_price}
             else:
-                return {"No this service_type":service_type,"found in hotel":self.hotel_name}
+                self.add_on_price = 0
+                self.set_total_price()
+                return {"message": "success","price":self.add_on_price}
         else:
             print("Unable to find hotel")
 
@@ -625,6 +654,8 @@ class Promotion:
         return self.total_coupon
 
 
+admin=Admin()
+
 
 room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "",True)
 room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "",True)
@@ -680,12 +711,20 @@ promotion1 = Promotion()
 promotion1.add_coupon(coupon1)
 
 
+
+    
+
+
 @app.get("/showhotel")
 async def Showhotel():
     response = catalog_hotel.show_hotel(catalog_hotel.hotel_list)
     # return responses.JSONResponse(response)
     return response
 
+@app.get("/showroom")
+async def Showroom():
+    response = hotel.show_room()    
+    return response
 
 
 @app.post("/register",response_model=insert_register)
@@ -698,7 +737,7 @@ async def register(Insert_register : insert_register):
    response = register.update(user, collect_user.collect)
    print(collect_user.collect)
    if response:
-      return response
+      return responses.JSONResponse(response)
    else:
       raise HTTPException(status_code=400, detail="Something error")
 
@@ -708,7 +747,7 @@ async def login(Insert : insert_login):
       collect_user = Collectuser()
       login = Login(Insert)
       global responselogin
-      responselogin = login.check_login(collect_user.collect)
+      responselogin = login.check_login(collect_user.collect, admin)
       if responselogin:
          return responses.JSONResponse(responselogin)
 
@@ -717,6 +756,30 @@ async def Auth():
     if responselogin:
         return  {"message":"success"}
     return {"message":"fail"}
+
+@app.post("/managehotel",response_model=insert_formaddhotel,status_code=status.HTTP_200_OK)
+async def managehotel(Insert_form : insert_formaddhotel):
+    set_data = {}
+    set_data.update(Insert_form)
+    set_data_list = list(set_data.values()) 
+    hotel_add = Hotel(set_data_list[0], set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4],set_data_list[5])
+    catalog_hotel.hotel_list.append(hotel_add)
+    print(catalog_hotel.hotel_list)
+    response = {"message":"success"}
+    return responses.JSONResponse(response)
+
+@app.post("/manageroom",response_model=insert_formaddroom,status_code=status.HTTP_200_OK)
+async def manageroom(Insert_form : insert_formaddroom):
+    set_data = {}
+    set_data.update(Insert_form)
+    set_data_list = list(set_data.values())
+    roomadd = Room(set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4], set_data_list[5], set_data_list[6], set_data_list[7], set_data_list[8])
+    global hotel
+    hotel = catalog_hotel.find_hotel(set_data_list[0], catalog_hotel.hotel_list)
+    hotel.add_room(roomadd)
+    print(hotel.get_room_list)
+    response = {"message":"success"}
+    return responses.JSONResponse(response)
 
 
 @app.post("/reserve",response_model=insert_reserve,status_code=status.HTTP_200_OK)
@@ -766,8 +829,8 @@ async def Addons(Insert_addon : insert_addon):
     setup = {}
     setup.update(Insert_addon)
     setupp = list(setup.values())
-    book.book_add_on(setupp[0], setupp[1], catalog_hotel, True)
-    response = {'message': 'success'}
+    response=book.book_add_on(setupp[0], setupp[1], catalog_hotel, True)
+    
     return responses.JSONResponse(response)
 
 @app.get("/totalprice")
@@ -800,11 +863,7 @@ async def Updatehistory():
 
 
 
+
+
+
     
-
-
-          
-
-   
-
-
