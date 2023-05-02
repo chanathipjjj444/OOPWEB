@@ -41,14 +41,6 @@ async def root():
 
 
 
-class Profile:
-    def __init__(self, prefix, name, surname, email, phone_number):
-        self._prefix = prefix
-        self._name = name
-        self._surname = surname
-        self._email = email
-        self._phone_number = phone_number
-
 class User:
     def __init__(self,data_user):
         self.data_set = {}
@@ -104,8 +96,6 @@ class Collectuser:
     collect = []
 
 class Register:
-    def __init__(self) -> None:
-        self.__user_dict ={}
 
     def update(self, data, collect):
         if(self.check_update(data,collect)):
@@ -594,11 +584,6 @@ class AllDebitcard:
     @property
     def get_debitcard_list(self):
         return self.__debitcard_list
-
-    def show_debitcard(self):
-        for debitcard in self.__debitcard_list:
-            print("Card number:",debitcard.card_number,"Card name:","Card Surname:",debitcard.surname,debitcard.card_name,"CVV card:",debitcard.card_cvv,
-                "Card balance:",debitcard.card_balance)
 
 
 class TypeCoupon:
