@@ -42,15 +42,12 @@ async def root():
 
 
 class User:
-    def __init__(self,data_user):
-        self.data_set = {}
-        self.data_set.update(data_user)
-        self.__data_user = list(self.data_set.values())
-        self.__name = self.__data_user[0]
-        self.__email = self.__data_user[1]
-        self.__password = self.__data_user[2]
-        self.__phone = self.__data_user[3]
-        self.__address = self.__data_user[4]
+    def __init__(self,data_user: insert_register):
+        self.__name = data_user.name
+        self.__email = data_user.email
+        self.__password = data_user.password
+        self.__phone = data_user.phone
+        self.__address = data_user.address
 
     @property
     def name(self):
@@ -91,60 +88,34 @@ class Admin:
     @property
     def password(self):
         return self.__password
-
-class Collectuser:
-    collect = []
-
-class Register:
-
-    def update(self, data, collect):
-        if(self.check_update(data,collect)):
-            collect.append(data)
-            print(self.__user_dict)
-            return  {'message':'success'}
-        print(self.__user_dict)
-        return  {'message':'fail'}
-    
-    def check_update(self,data,collect):
-        for check in collect:
-            if check.email == data.email or check.password == data.password:
-                print("invalid register")
-                return 0
-        print("Success register")
-        return 1
-        
+  
 class Login:
-    def __init__(self, data):
-        self.__data_set = {}
-        self.__data_set.update(data)
-        self.__data_list = list(self.__data_set.values())
-        self.__user_email = self.__data_list[0]
-        self.__user_password = self.__data_list[1]
-        self.__user_name = ""
     
-    def check_login(self, data_collect, admin):
-        if self.__user_email == admin.email and self.__user_password == admin.password:
+    collect = []
+    
+    def register(self, user):
+        self.collect.append(user)
+        return {'message':'success'}
+        
+    def check_login(self, email, password, admin):
+        if email == admin.email and password == admin.password:
                 print("Success auth admin!!")
                 return {
                         "auth": admin.auth,
                         "success": "true"
                         }
-        for check in data_collect:
-            if check.email == self.__user_email and check.password == self.__user_password:
+        for check in self.collect:
+            if check.email == email and check.password == password:
                 print("Success login!!")
-                self.__user_name = check.name
-                return self.show_detail()
+                return {
+                            "name" : check.name,
+                            "email" : check.email,
+                            "auth" : "false",
+                            "success": "true"
+                        }
         print("invalid login")
         return {"message":"fail"}
         
-    def show_detail(self):
-        view_account = {
-            "name" : self.__user_name,
-            "email" : self.__user_email,
-            "auth" : "false",
-            "success": "true"
-        }
-        return view_account
     
 
 # Order file !!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -399,11 +370,13 @@ class Addons:
         for add_on in self.add_on_list:
             if type_service == add_on.type_service and name_service == add_on.name_service:
                 self.add_on_price = add_on.price_service
+                print(add_on.price_service)
                 #print(self.__add_on_price)
                 print(self.add_on_price)
                 return self.add_on_price
         else:
             print(self.add_on_price)
+            
     
 
 class Service:
@@ -485,18 +458,15 @@ class Booking:
 
     def book_add_on(self, service_type, name_service, catalog):
         hotel = catalog.find_hotel(self.hotel_name, catalog.hotel_list)
+        print("prehotel")
         if hotel:
-                
             for add_on in hotel.get_add_on_hotel:
                     if add_on.name_service == name_service and add_on.type_service == service_type:
                         
                         self.add_on_price = addons.set_add_on_price(service_type,name_service)
+                        print("Helloworlddfsdafsdgd")
                         self.set_total_price()
                         return {"message": "success", "service_type": service_type, "service_detail": name_service, "price": self.add_on_price}
-                    else:
-                        self.add_on_price = 0
-                        self.set_total_price()
-                        return {"message": "success","price": self.add_on_price}
             else:
                 self.add_on_price = 0
                 self.set_total_price()
@@ -663,9 +633,7 @@ promotion1.add_coupon(coupon1)
 
 addaddons = Addons()
 
-
-    
-
+login1 = Login()
 
 @app.get("/showhotel")
 async def showhotel():
@@ -678,20 +646,14 @@ async def showroom():
     response = hotel.show_room()    
     return response
 
-# @app.get("/showroomfilter")
-# async def Showroomfilter():
-#     response = hotel.show_room()    
-#     return response
+
 
 @app.post("/register",response_model=insert_register)
 async def register(Insert_register : insert_register):
    # user = User(Insert_register)
    # user.process_data()
-   collect_user = Collectuser()
-   user =User(Insert_register)
-   register =Register()
-   response = register.update(user, collect_user.collect)
-   print(collect_user.collect)
+   user = User(Insert_register)
+   response = login1.register(user)
    if response:
       return responses.JSONResponse(response)
    else:
@@ -700,10 +662,9 @@ async def register(Insert_register : insert_register):
    
 @app.post("/login",response_model=insert_login,status_code=status.HTTP_200_OK)
 async def login(Insert : insert_login):
-      collect_user = Collectuser()
-      login = Login(Insert)
+    #   collect_user = Collectuser()
       global responselogin
-      responselogin = login.check_login(collect_user.collect, admin)
+      responselogin = login1.check_login(Insert.email, Insert.password, admin)
       if responselogin:
          return responses.JSONResponse(responselogin)
 
@@ -715,10 +676,7 @@ async def auth():
 
 @app.post("/managehotel",response_model=insert_formaddhotel,status_code=status.HTTP_200_OK)
 async def manage_hotel(Insert_form : insert_formaddhotel):
-    set_data = {}
-    set_data.update(Insert_form)
-    set_data_list = list(set_data.values()) 
-    hotel_add = Hotel(set_data_list[0], set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4],set_data_list[5])
+    hotel_add = Hotel(Insert_form.hotelname, Insert_form.rating, Insert_form.numsroom, Insert_form.hotelpicture, Insert_form.location, Insert_form.province )
     catalog_hotel.hotel_list.append(hotel_add)
     print(catalog_hotel.hotel_list)
     response = {"message":"success"}
@@ -726,12 +684,9 @@ async def manage_hotel(Insert_form : insert_formaddhotel):
 
 @app.post("/manageroom",response_model=insert_formaddroom,status_code=status.HTTP_200_OK)
 async def manage_room(Insert_form : insert_formaddroom):
-    set_data = {}
-    set_data.update(Insert_form)
-    set_data_list = list(set_data.values())
-    room_add = Room(set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4], set_data_list[5], set_data_list[6], set_data_list[7], set_data_list[8])
+    room_add = Room(Insert_form.numroom, Insert_form.types, Insert_form.numpeople, Insert_form.priceroom, Insert_form.facs, Insert_form.bedtype, Insert_form.roompicture, Insert_form.statusroom)
     global hotel
-    hotel = catalog_hotel.find_hotel(set_data_list[0], catalog_hotel.hotel_list)
+    hotel = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
     hotel.add_room(room_add)
     print(hotel.get_room_list)
     response = {"message":"success"}
@@ -745,16 +700,13 @@ async def getaddonss():
 
 @app.post("/manageaddons",response_model=insert_formaddaddon,status_code=status.HTTP_200_OK)
 async def manage_addon(Insert_form : insert_formaddaddon):        
-    set_data = {}
-    set_data.update(Insert_form)
-    set_data_list = list(set_data.values())
     add_data_addon = Addons()
-    service = Service(set_data_list[0], set_data_list[1], set_data_list[2], set_data_list[3], set_data_list[4])
+    service = Service(Insert_form.Typeservice, Insert_form.Nameservice, Insert_form.detail, Insert_form.picture, Insert_form.price)
     add_data_addon.add_service(service)
-    hoteladdons = catalog_hotel.find_hotel(set_data_list[5], catalog_hotel.hotel_list)
+    hoteladdons = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
     hoteladdons.add_addons(add_data_addon.get_add_on_list())
     global response_filter_addons
-    response_filter_addons = catalog_hotel.find_add_on(set_data_list[5], catalog_hotel.hotel_list)
+    response_filter_addons = catalog_hotel.find_add_on(Insert_form.namehotel, catalog_hotel.hotel_list)
     response = {"message":"success"}
     return responses.JSONResponse(response)
 
@@ -812,12 +764,7 @@ async def book_room():
 
 @app.post("/addon",response_model=insert_addon,status_code=status.HTTP_200_OK)
 async def bookadd_on(Insert_addon : insert_addon):
-    setup = {}
-    setup.update(Insert_addon)
-    setupp = list(setup.values())
-    response=book.book_add_on(setupp[0], setupp[1], catalog_hotel)
-    
-    
+    response=book.book_add_on(Insert_addon.servicetype,Insert_addon.nameservice , catalog_hotel)
     return responses.JSONResponse(response)
 
 @app.get("/totalprice")
@@ -827,13 +774,10 @@ async def total_price():
 
 @app.post("/payment",response_model=insert_debit,status_code=status.HTTP_200_OK)
 async def payment( Insert_debit: insert_debit):
-    setup = {}
-    setup.update(Insert_debit)
-    setupp = list(setup.values())
-    alldebitcard.check_card_from_user(setupp[0],setupp[1])
+    alldebitcard.check_card_from_user(Insert_debit.numcard, Insert_debit.cvv)
     pay = Payment(123456)
     global responsebill
-    responsebill =pay.process_payment(book, setupp[0], setupp[1], alldebitcard, promotion1, setupp[2])
+    responsebill =pay.process_payment(book, Insert_debit.numcard, Insert_debit.cvv, alldebitcard, promotion1, Insert_debit.coupon)
     print(responsebill)
     return responses.JSONResponse(responsebill)
     
