@@ -645,9 +645,9 @@ system = System()
 admin=Admin()
 
 
-room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "",True)
-room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "",True)
-room3 = Room(103, 'Standard', 3, 1500, 'TV, AC', 'King', "",True)
+room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "https://th.bing.com/th/id/R.9e3e8cfd7b19926276b6383be20ad1cf?rik=1dF1Sa6rYOPMjA&pid=ImgRaw&r=0",True)
+room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "https://th.bing.com/th/id/R.02d3393c9701f3e9d632a07eb122a730?rik=aAphNhPrdfXuvg&pid=ImgRaw&r=0",True)
+room3 = Room(103, 'Standard', 3, 1500, 'TV, AC', 'King', "https://th.bing.com/th/id/OIP.WwnZWJMQRGjcGO8-li92ZwHaHa?pid=ImgDet&rs=1",True)
 
 hotela = Hotel("Hotel A", "4.9", 10, "https://media-cdn.tripadvisor.com/media/photo-s/26/9d/77/93/entrance-hotel-artemide.jpg", "Mueng Phuket", "Phuket")
 hotelb = Hotel("Hotel B", "4.4", 10, "https://image-tc.galaxy.tf/wijpeg-2w1lrozu9m6gg4myhkj0lkgvf/43-hotel-exterior-v2-resized.jpg?width=1920", "Pattaya", "Chonburi")
@@ -677,28 +677,34 @@ catalog_hotel.hotel_list.append(hoteld)
 
 addons =Addons()
 
-servicefood = Service("Breakfast","steak","pork chop","https://fthmb.tqn.com/0jrXUoL0_Cpt44bvxS2EuRSUCVo=/2500x1667/filters:fill(auto,1)/pork-chop-2500-56a2103b5f9b58b7d0c62be9.jpg",100)
-servicecar = Service("Carservice","car","taxi","https://th.bing.com/th/id/R.4529e465aa8a46d5ee96bd25b429264b?rik=zP%2bzilSfjWju%2bw&pid=ImgRaw&r=0",200)
-servicespa = Service("Spaservice","spa","hand spa","https://image.freepik.com/free-photo/hand-spa-treatment_38583-160.jpg",150)
+service_food = Service("Breakfast","steak","pork chop","https://fthmb.tqn.com/0jrXUoL0_Cpt44bvxS2EuRSUCVo=/2500x1667/filters:fill(auto,1)/pork-chop-2500-56a2103b5f9b58b7d0c62be9.jpg",100)
+service_car = Service("Carservice","car","taxi","https://th.bing.com/th/id/R.4529e465aa8a46d5ee96bd25b429264b?rik=zP%2bzilSfjWju%2bw&pid=ImgRaw&r=0",200)
+service_spa = Service("Spaservice","spa","hand spa","https://image.freepik.com/free-photo/hand-spa-treatment_38583-160.jpg",150)
 
-addons.add_service(servicefood)
-addons.add_service(servicecar)
-addons.add_service(servicespa)
+addons.add_service(service_food)
+addons.add_service(service_car)
+addons.add_service(service_spa)
 hotela.add_addons(addons.get_add_on_list())
 hotelb.add_addons(addons.get_add_on_list())
 hotelc.add_addons(addons.get_add_on_list())
 hoteld.add_addons(addons.get_add_on_list())
 
 debit1 = DebitCardModel(123, "Teeruth", "Ieowsakulrat", 555, 10000)
+debit2 = DebitCardModel(179, "Chanatip", "Yaiyeam", 268, 10000)
+debit3 = DebitCardModel(268, "Napat", "Voratunyatron", 429, 10000)
+debit4 = DebitCardModel(429, "Thanasak", "Songsri", 495, 10000)
 
 alldebitcard = AllDebitcard()
 alldebitcard.add_card(debit1)
+alldebitcard.add_card(debit2)
+alldebitcard.add_card(debit3)
+alldebitcard.add_card(debit4)
 
-coupon1 = TypeCoupon("cost","...",500)
+coupon1 = TypeCoupon("cost","discount 500",500)
+
 promotion1 = Promotion()
 promotion1.add_coupon(coupon1)
 
-addaddons = Addons()
 
 login1 = Login()
 
@@ -717,8 +723,7 @@ async def showroom():
 
 @app.post("/register",response_model=insert_register)
 async def register(Insert_register : insert_register):
-   # user = User(Insert_register)
-   # user.process_data()
+  
    user = User(Insert_register)
    response = login1.register(user)
    if response:
@@ -729,11 +734,11 @@ async def register(Insert_register : insert_register):
    
 @app.post("/login",response_model=insert_login,status_code=status.HTTP_200_OK)
 async def login(Insert : insert_login):
-    #   collect_user = Collectuser()
-      global responselogin
-      responselogin = login1.check_login(Insert.email, Insert.password)
-      if responselogin:
-         return responses.JSONResponse(responselogin)
+
+    global responselogin
+    responselogin = login1.check_login(Insert.email, Insert.password)
+    if responselogin:
+        return responses.JSONResponse(responselogin)
 
 @app.get("/auth")
 async def auth():
@@ -765,7 +770,6 @@ async def manage_room(Insert_form : insert_formaddroom):
 
 @app.post("/manageaddons",response_model=insert_formaddaddon,status_code=status.HTTP_200_OK)
 async def manage_addon(Insert_form : insert_formaddaddon):        
-    # add_data_addon = Addons()
     service = Service(Insert_form.Typeservice, Insert_form.Nameservice, Insert_form.detail, Insert_form.picture, Insert_form.price)
     addons.add_service(service)
     hoteladdons = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
@@ -779,12 +783,7 @@ async def manage_addon(Insert_form : insert_formaddaddon):
 async def getaddonss():
     return system.getter_response_addons()
 
-    # type_service,name_service,detail,picture,price_service
-    # return {""}
-
-
-
-
+   
 @app.post("/findavailableroom",response_model=insert_reserve,status_code=status.HTTP_200_OK)
 async def reserve(Insert_reserve : insert_reserve):
     print(catalog_hotel.hotel_list)
@@ -795,17 +794,12 @@ async def reserve(Insert_reserve : insert_reserve):
     system.setter_checkout(Insert_reserve.checkout)
     system.setter_numpeople(Insert_reserve.people)
     
-
-    # book = Booking(ci, co, cp, 1)
     print(response)
     if response:
         return responses.JSONResponse(response)
     else:
       raise HTTPException(status_code=400, detail="Something error")
 
-# check_in:str, check_out:str, num_people:int, num_room:int
-
-# check_in:str, check_out:str, num_people:int, num_room:int
 
 @app.post("/findaddon",response_model=insert_booking,status_code=status.HTTP_200_OK) #find add on
 async def findaddon(Insert_booking : insert_booking):
@@ -813,7 +807,6 @@ async def findaddon(Insert_booking : insert_booking):
     system.setter_object_book(book)
     response_filter_addons = catalog_hotel.find_add_on(system.getter_namehotel(), catalog_hotel.hotel_list)
     system.setter_response_addons(response_filter_addons)
-    
     
     return responses.JSONResponse(response_filter_addons)
 
@@ -852,7 +845,6 @@ async def show_bill():
 @app.get("/updatebill")
 async def Updatehistory():
     order_history.history.append(system.getter_object_book())
-    #print(order_history)
     order_history.show_history()
     response = {"message":"success"}
     return responses.JSONResponse(response)
