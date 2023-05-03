@@ -8,9 +8,13 @@ import { AuthProvider } from "./context/auth"
 import { RoomProvider } from './context/room';
 import { DataProvider } from './context/data';
 import { LastProvider } from './context/lastprice';
+import { AddonsProvider } from './context/addonsshow';
+import { SystemProvider } from './context/system';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <SystemProvider>
+  <AddonsProvider>
   <LastProvider>
   <DataProvider>
   <RoomProvider>
@@ -24,6 +28,8 @@ root.render(
   </RoomProvider>
   </DataProvider>
   </LastProvider>
+  </AddonsProvider>
+  </SystemProvider>
 
 );
 
