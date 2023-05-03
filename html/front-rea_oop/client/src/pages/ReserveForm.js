@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useRoom } from '../context/room';
+import { useSystem } from '../context/system';
 // import { useData } from '../context/data';
 
 
@@ -16,6 +17,7 @@ const ReserveForm = () => {
   const [roomdata,setRoomdata]= useRoom()
   const [t,setT] = useState("")
   const [auth,setAuth] = useState('')
+
   // const [insert,setInsert] = useData()
   const Navigate = useNavigate();
   
@@ -27,6 +29,7 @@ const ReserveForm = () => {
       e.preventDefault();
       axios.post('http://localhost:8000/findavailableroom/',{'country':country,'hotel':hotel,'room':room,'people':people,'checkin':checkin,'checkout':checkout})
     .then(res => {
+
     setRoomdata({
       ...roomdata,
       FreeRoom: res.data

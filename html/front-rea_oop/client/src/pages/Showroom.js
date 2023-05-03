@@ -3,11 +3,14 @@ import Layout from '../component/Layout/Layout'
 import axios from 'axios';
 import { useRoom } from '../context/room';
 import { useNavigate } from 'react-router-dom';
+import { useAddons } from '../context/addonsshow';
+import { useSystem } from '../context/system';
 
 const Showroom = () => {
   const Navigate = useNavigate();
   const [data,setData] = useState("")
   const [roomdata,setRoomdata]= useRoom()
+  const [addonsdata,setAddonsdata] = useAddons()
   
 
 
@@ -16,6 +19,12 @@ const Showroom = () => {
     e.preventDefault();
     axios.post('http://localhost:8000/findaddon/',{'numroom':data})
     .then(res=>{
+    setAddonsdata({
+      ...addonsdata,
+      Addons: res.data
+    }
+    )
+
     Navigate('/addon')
   })
     

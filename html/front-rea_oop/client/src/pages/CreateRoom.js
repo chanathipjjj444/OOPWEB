@@ -19,7 +19,9 @@ const CreateRoom = () => {
     const handlesubmit = (e) => {
         e.preventDefault();
         axios.post('http://localhost:8000/manageroom/',{'namehotel':namehotel,'numroom':numroom,'types':types,'numpeople':numpeople,'priceroom':priceroom,'facs':facs,'bedtype':bedtype,'roompicture':roompicture,'statusroom':statusroom})
-        .then(res => {console.log(res)})
+        .then(res => {console.log(res)
+        
+        })
         axios.get('http://localhost:8000/showroom/').then(res=> {console.log(res)
         setData(res.data)
         }
