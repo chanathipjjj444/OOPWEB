@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useData } from '../context/data'
 import { useLast } from '../context/lastprice'
+import { useAddons } from '../context/addonsshow'
 
 
 const Addon = () => {
@@ -14,6 +15,7 @@ const Addon = () => {
     const [type,setType] = useState('')
     const [lprice,setLprice]= useLast()
     const [price, setPrice] = useState("")
+    const [addonsdata,setAddonsdata] = useAddons([])
     const [data,setData] = useState([])
 
     axios.get('http://localhost:8000/bookroom/')
@@ -23,10 +25,10 @@ const Addon = () => {
       )
     })
 
-    axios.get('http://localhost:8000/getaddons/').then(res=> {console.log(res)
-        setData(res.data)
-        }
-        )
+    // axios.get('http://localhost:8000/getaddons/').then(res=> {console.log(res)
+    //     setData(res.data)
+    //     }
+    //     )
       
 
 
@@ -42,25 +44,8 @@ const handlesubmit = (e) => {
   return (
 
     <Layout>
-        {data.map((item, index)=> (
-                    // <div key={index}>
-                        <>
-                        <tr>
-                            {/* <td><div key={index}></div></td> */}
-                            <td>
-                                    <p>{item.Hotel} Type: {item.Service_type} Name service: {item.Name} Detail: {item.Detail} Price: {item.Price}</p>
-                                    
-                                    
-                                <img src={item.Picture}    width={500} height={350} />
-
-                            </td>
-                        </tr>
-                        
-                        </>
-                            
-                        
-                    ))}
-
+        
+        <p className='text-black'>{JSON.stringify(addonsdata, null, 4)}</p>
     <div className="form-container" style={{ minHeight: "85vh" }}>
         <form onSubmit={handlesubmit}>
             <h4 className="title">Addons FORM</h4>
