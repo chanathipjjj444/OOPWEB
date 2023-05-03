@@ -97,11 +97,11 @@ class Login:
         self.collect.append(user)
         return {'message':'success'}
         
-    def check_login(self, email, password, admin):
-        if email == admin.email and password == admin.password:
+    def check_login(self, email, password):
+        if "admin@gmail.com" == email and "0123456789" == password:
                 print("Success auth admin!!")
                 return {
-                        "auth": admin.auth,
+                        "auth": "true",
                         "success": "true"
                         }
         for check in self.collect:
@@ -664,7 +664,7 @@ async def register(Insert_register : insert_register):
 async def login(Insert : insert_login):
     #   collect_user = Collectuser()
       global responselogin
-      responselogin = login1.check_login(Insert.email, Insert.password, admin)
+      responselogin = login1.check_login(Insert.email, Insert.password)
       if responselogin:
          return responses.JSONResponse(responselogin)
 
