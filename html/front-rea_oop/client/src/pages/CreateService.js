@@ -103,7 +103,7 @@ const CreateAddons = () => {
                         }}
                         className="form-control"
                         id="exampleInputEmail1"
-                        placeholder="Enter Price src picture"
+                        placeholder="Enter src picture"
                         required
                         autoFocus
                     />
