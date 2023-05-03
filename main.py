@@ -227,14 +227,12 @@ class HotelCatalog:
                 return hotel
         print("Error: Hotel not found")
         
-    def find_available_room(self,data, list_hotel):
-        self.__hotel_set ={}
-        self.__hotel_set.update(data)
-        self.__check_awail = list(self.__hotel_set.values())
-        self.__name = str(self.__check_awail[1])
-        self.__check_in = str(self.__check_awail[4])
-        self.__check_out = str(self.__check_awail[5])
-        self.__num_people = int(self.__check_awail[3])
+    def find_available_room(self,name, checkin, checkout, numpeople, list_hotel):
+        
+        self.__name = str(name)
+        self.__check_in = str(checkin)
+        self.__check_out = str(checkout)
+        self.__num_people = int(numpeople)
         self.__available_rooms = []
         check = 0
         self.__available_rooms_dict ={}
@@ -409,13 +407,11 @@ class Service:
 
 class Booking:
     def __init__(self, check_in:str, check_out:str, num_people:int, num_room:int):
-        self.data_set = {}
-        self.data_set.update(num_room)
-        self.__data_user = list(self.data_set.values())
+        
         self.check_in = datetime.strptime(check_in, '%d-%m-%Y').date()
         self.check_out = datetime.strptime(check_out, '%d-%m-%Y').date()
         self.num_people = num_people
-        self.num_room = self.__data_user[0]
+        self.num_room = num_room
         self.hotel_name = None
         self.room_number = None
         self.room_price = 0
@@ -448,6 +444,7 @@ class Booking:
                         self.get_num_days()
                         
                         self.room_price =room.set_room_price(self.total_days)
+                        
                         self.set_total_price()
 
                         return {"message": "Booking successful","Room number": self.num_room, "Room Status": room.get_room_status, "Price":self.total_price}
@@ -473,6 +470,8 @@ class Booking:
                 return {"message": "success","price":self.add_on_price}
         else:
             print("Unable to find hotel")
+
+
 
 
 # Payment file !!!!!!!!!!!!!!
@@ -573,7 +572,75 @@ class Promotion:
 
     def get_coupon_list(self):
         return self.total_coupon
+    
+class System:
+    def __init__(self):
+        self.__set_checkin = ""
+        self.__set_checkout = ""
+        self.__set_namehotel = ""
+        self.__set_numpeople = 0
+        self.__set_numhotel = 0
+        self.__set_book = None
+        self.__set_hotel = None
+        self.__set_response_addon = []
+        self.__set_response_bill = {}
+    
+    def getter_checkin(self):
+        return self.__set_checkin
+    
+    def setter_checkin(self, setin):
+        self.__set_checkin = setin
+    
+    def getter_checkout(self):
+        return self.__set_checkout
+    
+    def setter_checkout(self, setin):
+        self.__set_checkout = setin
+    
+    def getter_namehotel(self):
+        return self.__set_namehotel
+    
+    def setter_namehotel(self, setin):
+        self.__set_namehotel = setin
+    
+    def getter_numhotel(self):
+        return self.__set_numhotel
+    
+    def setter_numhotel(self, setin):
+        self.__set_numhotel = setin
+    
+    def getter_numpeople(self):
+        return self.__set_numpeople
+    
+    def setter_numpeople(self, setin):
+        self.__set_numpeople = int(setin)
+    
+    def getter_object_book(self):
+        return self.__set_book
+    
+    def setter_object_book(self, setin):
+        self.__set_book = setin
 
+    def getter_response_addons(self):
+        return self.__set_response_addon
+    
+    def setter_response_addons(self, setin):
+        self.__set_response_addon = setin
+
+    def getter_response_bill(self):
+        return self.__set_response_bill
+    
+    def setter_response_bill(self, setin):
+        self.__set_response_bill = setin
+    
+    def getter_object_hotel(self):
+        return self.__set_hotel
+    
+    def setter_object_hotel(self, setin):
+        self.__set_hotel = setin
+
+
+system = System()    
 
 admin=Admin()
 
@@ -582,10 +649,10 @@ room1 = Room(101, 'Standard', 3, 1000, 'TV, AC', 'Queen', "",True)
 room2 = Room(102, 'Deluxe', 3, 2000, 'TV, AC, Jacuzzi', 'King', "",True)
 room3 = Room(103, 'Standard', 3, 1500, 'TV, AC', 'King', "",True)
 
-hotela = Hotel("Hotel A", "4.9", 10, "https://media-cdn.tripadvisor.com/media/photo-s/26/9d/77/93/entrance-hotel-artemide.jpg", "Puket", "..")
-hotelb = Hotel("Hotel B", "4.4", 10, "https://image-tc.galaxy.tf/wijpeg-2w1lrozu9m6gg4myhkj0lkgvf/43-hotel-exterior-v2-resized.jpg?width=1920", "Rayong", "..")
-hotelc = Hotel("Hotel C", "4.7", 10, "https://media-cdn.tripadvisor.com/media/photo-s/16/1a/ea/54/hotel-presidente-4s.jpg", "chaingmai", "..")
-hoteld = Hotel("Hotel D", "4.2", 10, 'https://pix10.agoda.net/hotelImages/124/1246280/1246280_16061017110043391702.jpg?ca=6&ce=1&s=1024x768', "Bankok", "..")
+hotela = Hotel("Hotel A", "4.9", 10, "https://media-cdn.tripadvisor.com/media/photo-s/26/9d/77/93/entrance-hotel-artemide.jpg", "Mueng Phuket", "Phuket")
+hotelb = Hotel("Hotel B", "4.4", 10, "https://image-tc.galaxy.tf/wijpeg-2w1lrozu9m6gg4myhkj0lkgvf/43-hotel-exterior-v2-resized.jpg?width=1920", "Pattaya", "Chonburi")
+hotelc = Hotel("Hotel C", "4.7", 10, "https://media-cdn.tripadvisor.com/media/photo-s/16/1a/ea/54/hotel-presidente-4s.jpg", "Mueang Chiang Mai", "Chiang Mai")
+hoteld = Hotel("Hotel D", "4.2", 10, 'https://pix10.agoda.net/hotelImages/124/1246280/1246280_16061017110043391702.jpg?ca=6&ce=1&s=1024x768', "Lardprao", "Bangkok")
 hotela.add_room(room1)
 hotela.add_room(room2)
 hotela.add_room(room3)
@@ -610,9 +677,9 @@ catalog_hotel.hotel_list.append(hoteld)
 
 addons =Addons()
 
-servicefood = Service("Breakfast","steak","...","...",100)
-servicecar = Service("Carservice","car","...","...",200)
-servicespa = Service("Spaservice","spa","...","...",150)
+servicefood = Service("Breakfast","steak","pork chop","https://fthmb.tqn.com/0jrXUoL0_Cpt44bvxS2EuRSUCVo=/2500x1667/filters:fill(auto,1)/pork-chop-2500-56a2103b5f9b58b7d0c62be9.jpg",100)
+servicecar = Service("Carservice","car","taxi","https://th.bing.com/th/id/R.4529e465aa8a46d5ee96bd25b429264b?rik=zP%2bzilSfjWju%2bw&pid=ImgRaw&r=0",200)
+servicespa = Service("Spaservice","spa","hand spa","https://image.freepik.com/free-photo/hand-spa-treatment_38583-160.jpg",150)
 
 addons.add_service(servicefood)
 addons.add_service(servicecar)
@@ -622,7 +689,7 @@ hotelb.add_addons(addons.get_add_on_list())
 hotelc.add_addons(addons.get_add_on_list())
 hoteld.add_addons(addons.get_add_on_list())
 
-debit1 = DebitCardModel(123, "test", "ttt", 555, 10000)
+debit1 = DebitCardModel(123, "Teeruth", "Ieowsakulrat", 555, 10000)
 
 alldebitcard = AllDebitcard()
 alldebitcard.add_card(debit1)
@@ -643,7 +710,7 @@ async def showhotel():
 
 @app.get("/showroom")
 async def showroom():
-    response = hotel.show_room()    
+    response = system.getter_object_hotel().show_room()    
     return response
 
 
@@ -674,6 +741,7 @@ async def auth():
         return  {"message":"success"}
     return {"message":"fail"}
 
+
 @app.post("/managehotel",response_model=insert_formaddhotel,status_code=status.HTTP_200_OK)
 async def manage_hotel(Insert_form : insert_formaddhotel):
     hotel_add = Hotel(Insert_form.hotelname, Insert_form.rating, Insert_form.numsroom, Insert_form.hotelpicture, Insert_form.location, Insert_form.province )
@@ -682,35 +750,34 @@ async def manage_hotel(Insert_form : insert_formaddhotel):
     response = {"message":"success"}
     return responses.JSONResponse(response)
 
+
 @app.post("/manageroom",response_model=insert_formaddroom,status_code=status.HTTP_200_OK)
 async def manage_room(Insert_form : insert_formaddroom):
     room_add = Room(Insert_form.numroom, Insert_form.types, Insert_form.numpeople, Insert_form.priceroom, Insert_form.facs, Insert_form.bedtype, Insert_form.roompicture, Insert_form.statusroom)
-    global hotel
     hotel = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
+    system.setter_object_hotel(hotel)
     hotel.add_room(room_add)
     print(hotel.get_room_list)
     response = {"message":"success"}
     return responses.JSONResponse(response)
 
-@app.get("/getaddons")
-async def getaddonss():
-    return response_filter_addons
-
 
 
 @app.post("/manageaddons",response_model=insert_formaddaddon,status_code=status.HTTP_200_OK)
 async def manage_addon(Insert_form : insert_formaddaddon):        
-    add_data_addon = Addons()
+    # add_data_addon = Addons()
     service = Service(Insert_form.Typeservice, Insert_form.Nameservice, Insert_form.detail, Insert_form.picture, Insert_form.price)
-    add_data_addon.add_service(service)
+    addons.add_service(service)
     hoteladdons = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
-    hoteladdons.add_addons(add_data_addon.get_add_on_list())
-    global response_filter_addons
+    hoteladdons.add_addons(addons.get_add_on_list())
     response_filter_addons = catalog_hotel.find_add_on(Insert_form.namehotel, catalog_hotel.hotel_list)
+    system.setter_response_addons(response_filter_addons)
     response = {"message":"success"}
     return responses.JSONResponse(response)
 
-
+@app.get("/getaddons")
+async def getaddonss():
+    return system.getter_response_addons()
 
     # type_service,name_service,detail,picture,price_service
     # return {""}
@@ -721,17 +788,12 @@ async def manage_addon(Insert_form : insert_formaddaddon):
 @app.post("/findavailableroom",response_model=insert_reserve,status_code=status.HTTP_200_OK)
 async def reserve(Insert_reserve : insert_reserve):
     print(catalog_hotel.hotel_list)
-    global response
-    response = catalog_hotel.find_available_room(Insert_reserve,
+    response = catalog_hotel.find_available_room(Insert_reserve.hotel,Insert_reserve.checkin,Insert_reserve.checkout,Insert_reserve.people,
     catalog_hotel.hotel_list)
-    global name
-    global check_in
-    global check_out
-    global check_people
-    name = catalog_hotel.getter_name
-    check_in = catalog_hotel.getter_checkin
-    check_out = catalog_hotel.getter_checkout
-    check_people = catalog_hotel.getter_checkpeople
+    system.setter_namehotel(Insert_reserve.hotel)
+    system.setter_checkin(Insert_reserve.checkin)
+    system.setter_checkout(Insert_reserve.checkout)
+    system.setter_numpeople(Insert_reserve.people)
     
 
     # book = Booking(ci, co, cp, 1)
@@ -747,64 +809,50 @@ async def reserve(Insert_reserve : insert_reserve):
 
 @app.post("/findaddon",response_model=insert_booking,status_code=status.HTTP_200_OK) #find add on
 async def findaddon(Insert_booking : insert_booking):
-    global book
-    book = Booking(check_in, check_out, check_people, Insert_booking)
-    global response_filter_addons
-    response_filter_addons = catalog_hotel.find_add_on(name, catalog_hotel.hotel_list)
-    response= {"message":"true"}
+    book = Booking(system.getter_checkin(), system.getter_checkout(), system.getter_numpeople(), Insert_booking.numroom)
+    system.setter_object_book(book)
+    response_filter_addons = catalog_hotel.find_add_on(system.getter_namehotel(), catalog_hotel.hotel_list)
+    system.setter_response_addons(response_filter_addons)
     
-    return responses.JSONResponse(response)
+    
+    return responses.JSONResponse(response_filter_addons)
 
 @app.get("/bookroom")  #booking
 async def book_room():
-    response    = book.book_room_check(name, catalog_hotel)
+    if system.getter_object_book().add_on_price == None:
+     system.getter_object_book().add_on_price = 0
+    response    = system.getter_object_book().book_room_check(system.getter_namehotel(), catalog_hotel)
     print(response)
     return responses.JSONResponse(response)
 
 
 @app.post("/addon",response_model=insert_addon,status_code=status.HTTP_200_OK)
 async def bookadd_on(Insert_addon : insert_addon):
-    response=book.book_add_on(Insert_addon.servicetype,Insert_addon.nameservice , catalog_hotel)
+    response=system.getter_object_book().book_add_on(Insert_addon.servicetype,Insert_addon.nameservice , catalog_hotel)
     return responses.JSONResponse(response)
 
 @app.get("/totalprice")
 async def total_price():
-    response = book.set_total_price()
+    response = system.getter_object_book().set_total_price()
     return responses.JSONResponse(response)
 
 @app.post("/payment",response_model=insert_debit,status_code=status.HTTP_200_OK)
 async def payment( Insert_debit: insert_debit):
     alldebitcard.check_card_from_user(Insert_debit.numcard, Insert_debit.cvv)
     pay = Payment(123456)
-    global responsebill
-    responsebill =pay.process_payment(book, Insert_debit.numcard, Insert_debit.cvv, alldebitcard, promotion1, Insert_debit.coupon)
+    responsebill =pay.process_payment(system.getter_object_book(), Insert_debit.numcard, Insert_debit.cvv, alldebitcard, promotion1, Insert_debit.coupon)
+    system.setter_response_bill(responsebill)
     print(responsebill)
     return responses.JSONResponse(responsebill)
     
 @app.get("/bill")
 async def show_bill():
-    return responses.JSONResponse(responsebill)
+    return responses.JSONResponse(system.getter_response_bill())
 
 @app.get("/updatebill")
 async def Updatehistory():
-    order_history.history.append(book)
+    order_history.history.append(system.getter_object_book())
     #print(order_history)
     order_history.show_history()
     response = {"message":"success"}
     return responses.JSONResponse(response)
-
-
-
-
-
-    
-
-
-          
-
-   
-
-
-
-
-

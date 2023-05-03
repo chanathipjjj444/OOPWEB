@@ -21,9 +21,7 @@ class insert_reserve(BaseModel):
     checkout:str
 
 class insert_booking(BaseModel):
-    # checkin:str
-    # checkout:str
-    # numpeople:int
+    
     numroom:int
 
 class insert_addon(BaseModel):
