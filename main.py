@@ -95,6 +95,13 @@ class Login:
     
     def register(self, user):
         self.collect.append(user)
+        num_email = 0 
+        for i in self.collect:
+            if user.email == i.email:
+                num_email +=1 
+                if num_email == 2:
+                    self.collect.pop(self.collect.index(i))
+                    return {"message":"fail"}
         return {'message':'success'}
         
     def check_login(self, email, password):
@@ -694,11 +701,11 @@ debit2 = DebitCardModel(179, "Chanatip", "Yaiyeam", 268, 10000)
 debit3 = DebitCardModel(268, "Napat", "Voratunyatron", 429, 10000)
 debit4 = DebitCardModel(429, "Thanasak", "Songsri", 495, 10000)
 
-alldebitcard = AllDebitcard()
-alldebitcard.add_card(debit1)
-alldebitcard.add_card(debit2)
-alldebitcard.add_card(debit3)
-alldebitcard.add_card(debit4)
+all_debitcard = AllDebitcard()
+all_debitcard.add_card(debit1)
+all_debitcard.add_card(debit2)
+all_debitcard.add_card(debit3)
+all_debitcard.add_card(debit4)
 
 coupon1 = TypeCoupon("cost","discount 500",500)
 
@@ -831,9 +838,9 @@ async def total_price():
 
 @app.post("/payment",response_model=insert_debit,status_code=status.HTTP_200_OK)
 async def payment( Insert_debit: insert_debit):
-    alldebitcard.check_card_from_user(Insert_debit.numcard, Insert_debit.cvv)
+    all_debitcard.check_card_from_user(Insert_debit.numcard, Insert_debit.cvv)
     pay = Payment(123456)
-    responsebill =pay.process_payment(system.getter_object_book(), Insert_debit.numcard, Insert_debit.cvv, alldebitcard, promotion1, Insert_debit.coupon)
+    responsebill =pay.process_payment(system.getter_object_book(), Insert_debit.numcard, Insert_debit.cvv, all_debitcard, promotion1, Insert_debit.coupon)
     system.setter_response_bill(responsebill)
     print(responsebill)
     return responses.JSONResponse(responsebill)
