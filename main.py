@@ -760,8 +760,8 @@ async def manage_hotel(Insert_form : insert_formaddhotel):
 async def manage_room(Insert_form : insert_formaddroom):
     room_add = Room(Insert_form.numroom, Insert_form.types, Insert_form.numpeople, Insert_form.priceroom, Insert_form.facs, Insert_form.bedtype, Insert_form.roompicture, Insert_form.statusroom)
     hotel = catalog_hotel.find_hotel(Insert_form.namehotel, catalog_hotel.hotel_list)
-    system.setter_object_hotel(hotel)
     hotel.add_room(room_add)
+    system.setter_object_hotel(hotel)
     print(hotel.get_room_list)
     response = {"message":"success"}
     return responses.JSONResponse(response)
