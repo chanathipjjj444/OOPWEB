@@ -17,7 +17,7 @@ const Showroom = () => {
   const handlesubmit = (e) => {
     
     e.preventDefault();
-    axios.post('http://localhost:8000/findaddon/',{'numroom':data})
+    axios.post('http://localhost:8000/setbooking/',{'numroom':data})
     .then(res=>{
     setAddonsdata({
       ...addonsdata,
