@@ -808,8 +808,8 @@ async def reserve(Insert_reserve : insert_reserve):
       raise HTTPException(status_code=400, detail="Something error")
 
 
-@app.post("/findaddon",response_model=insert_booking,status_code=status.HTTP_200_OK) #find add on
-async def findaddon(Insert_booking : insert_booking):
+@app.post("/setbooking",response_model=insert_booking,status_code=status.HTTP_200_OK) #find add on
+async def set_booking(Insert_booking : insert_booking):
     book = Booking(system.getter_checkin(), system.getter_checkout(), system.getter_numpeople(), Insert_booking.numroom)
     system.setter_object_book(book)
     response_filter_addons = catalog_hotel.find_add_on(system.getter_namehotel(), catalog_hotel.hotel_list)
